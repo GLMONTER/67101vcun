@@ -6,9 +6,9 @@ pros::Motor leftLoader(12, pros::E_MOTOR_GEARSET_06, false);
 pros::Motor rightLoader(4, pros::E_MOTOR_GEARSET_06, true);
 
 pros::Motor rightFront(11, true);
-pros::Motor leftFront(1, false);
-pros::Motor rightBack(20, true);
-pros::Motor leftBack(10, false);
+pros::Motor leftFront(20, false);
+pros::Motor rightBack(1, true);
+pros::Motor leftBack(9, false);
 
 //includes flywheel, and the two lifts
 pros::Motor topSystem(3, pros::E_MOTOR_GEARSET_06, false);
@@ -23,8 +23,23 @@ static bool buttonPressedF = 0;
 
 extern bool sortToggle;
 
+void setDrive(int32_t leftPower, int32_t rightPower)
+{
+    rightFront.move(rightPower);
+    rightBack.move(rightPower);
+    leftFront.move(leftPower);
+    leftBack.move(leftPower);
+
+}
+void setLoaders(int32_t leftPower, int32_t rightPower)
+{
+    leftLoader.move(leftPower);
+    rightLoader.move(rightPower);
+}
+
 void sortFailsafe()
 {
+   
     if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_B))
     {
         SORT_SYS_ENABLE = true;
@@ -87,8 +102,8 @@ void sortFailsafe()
     //if backward button toggle is on, then start the motor backward
     if(buttonToggleR == true)
     {
-        topSystem.move(-127);
-		bottomSystem.move(127);
+        topSystem.move(127);
+		bottomSystem.move(-127);
 
     }
     //else, check if the forward toggle is off, then stop.

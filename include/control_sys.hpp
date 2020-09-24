@@ -2,7 +2,8 @@
 
 
 void sortFailsafe();
-
+void setDrive(int32_t leftPower, int32_t rightPower);
+void setLoaders(int32_t leftPower, int32_t rightPower);
 
 extern pros::Controller controller;
 
