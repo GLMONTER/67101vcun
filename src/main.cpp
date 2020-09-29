@@ -52,6 +52,15 @@ static bool topPressed;
 //pros::ADIEncoder left('B', 'C');
 void opcontrol() 
 {
+	LV_IMG_DECLARE(vaquita);
+
+	
+	lv_obj_t * im = lv_img_create(lv_scr_act(), NULL);
+	
+	lv_img_set_src(im, &vaquita);
+	lv_obj_set_pos(im,  0, -75);
+	lv_obj_set_drag(im, false);
+
 	while (true) 
 	{
 		int32_t ch1 = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);

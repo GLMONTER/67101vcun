@@ -11,8 +11,8 @@ pros::Motor rightBack(1, true);
 pros::Motor leftBack(9, false);
 
 //includes flywheel, and the two lifts
-pros::Motor topSystem(3, pros::E_MOTOR_GEARSET_06, false);
-pros::Motor bottomSystem(5, pros::E_MOTOR_GEARSET_06, false);
+pros::Motor topSystem(5, pros::E_MOTOR_GEARSET_18, false);
+pros::Motor bottomSystem(3, pros::E_MOTOR_GEARSET_06, false);
 
 //toggles for lift
 static bool buttonToggleR = 0;
