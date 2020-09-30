@@ -1,8 +1,9 @@
 #include"main.h"
+
 pros::Imu imu(18);
-
-
-void gyroTurn(float deg)
+extern pros::ADIDigitalIn topLimit;
+extern bool SORT_SYS_ENABLE;
+static void gyroTurn(const float deg)
 {
 	leftBack.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
     leftFront.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
@@ -43,7 +44,7 @@ void gyroTurn(float deg)
 }
 
 
-auto chassis = ChassisControllerBuilder()
+static auto chassis = ChassisControllerBuilder()
     .withMotors(
         20,  // Top left
         11, // Top right (reversed)
@@ -56,32 +57,102 @@ auto chassis = ChassisControllerBuilder()
 
   auto xModel = std::dynamic_pointer_cast<XDriveModel>(chassis->getModel());
 
-  
-void swingTurn(int32_t forwardPower, int32_t turnPower)
+//function to see when the robot shoots a ball into the tower.
+static void waitUntilShoot(const uint32_t timeAfterShoot)
+{
+    //wait until the limit switch is pressed
+    while(!topLimit.get_value())
+    {
+        pros::delay(10);
+    }
+    //delay doing anything until the ball is completely out of the robot.
+    pros::delay(timeAfterShoot);
+}
+static void strafeAbstract(std::shared_ptr<okapi::XDriveModel>& model, double velocityPower, const uint32_t timeToStrafe, const uint32_t timeToSettle)
+{
+    model->strafe(velocityPower);
+    pros::delay(timeToStrafe);
+    model->stop();
+    pros::delay(timeToSettle);
+}
+static void swingTurn(const int32_t forwardPower, const int32_t turnPower, const uint32_t timeToRun, const uint32_t driveSettle)
 {
     setDrive(forwardPower + turnPower, forwardPower - turnPower);
+    pros::Task::delay(timeToRun);
+    setDrive(0,0);
+    pros::Task::delay(driveSettle);
 }
+enum loaderSetting
+{
+    Forward = 0,
+    Backward = 1,
+    Disabled = 2
+};
+static void setLoaders(const loaderSetting setting)
+{
+    if(setting == loaderSetting::Forward)
+    {
+        leftLoader.move(127);
+        rightLoader.move(127);
+    }
+    else if(setting == loaderSetting::Backward)
+    {
+        leftLoader.move(-127);
+        rightLoader.move(-127); 
+    }
+    else if(setting == loaderSetting::Disabled)
+    {
+        leftLoader.move(0);
+        rightLoader.move(0);  
+    }
     
+}
+static void redAuton()
+{
+    //swing into tower
+    swingTurn(70, 30, 500, 500);
+
+     //start lifts and sorting
+    SORT_SYS_ENABLE = true;
+    setLoaders(loaderSetting::Forward);
+
+    //Perform loading/sorting procedure
+
+    //swing out of tower to begin strafing
+    swingTurn(-90, 35, 400, 750);
+    setLoaders(loaderSetting::Disabled);
+
+    //align for strafing.
+    gyroTurn(90);
+
+    //strafe right for next tower
+    strafeAbstract(xModel, -200, 930, 500);
+
+    //align at tower
+    gyroTurn(90);
+
+    //move towards tower
+    chassis->moveDistance(0.5_ft);
+
+    //wait until scored
+    waitUntilShoot(500);
+
+    chassis->moveDistance(-0.5_ft);
+
+    //strafe to next tower
+    strafeAbstract(xModel, -200, 930, 500);
+    
+    //swing into tower
+    swingTurn(70, -30, 500, 500);
+
+    setLoaders(loaderSetting::Forward);
+}
 void runAuton()
 {
+    //init gyro
     imu.reset();
-   pros::delay(2000);
-    
-    swingTurn(70, 30);
-    
-    pros::delay(500);
-    setDrive(0,0);
-    pros::delay(500);
-    swingTurn(-90, 35);
-    pros::delay(400);
-    setDrive(0,0);
-    pros::delay(750);
-    gyroTurn(90);
-    xModel->strafe(-200);
-    pros::Task::delay(930);
-    xModel->stop();
-    pros::Task::delay(500);
+    pros::delay(2000);
 
-    gyroTurn(90);
+    redAuton();
 
 }

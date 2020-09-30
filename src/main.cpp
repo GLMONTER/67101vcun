@@ -63,6 +63,14 @@ void opcontrol()
 
 	while (true) 
 	{
+		static int i = 0;
+		if(i == 100)
+		{
+			std::string temp = std::to_string(topSystem.get_temperature());
+			controller.print(0, 0, "%f" ,temp.c_str());
+			i = 0;
+		}
+		i++;
 		int32_t ch1 = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
 		int32_t ch2 = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y);
 		int32_t ch3 = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
