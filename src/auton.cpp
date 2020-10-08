@@ -1,8 +1,57 @@
 #include"main.h"
 
-pros::Imu imu(18);
+pros::Imu imu(21);
+
 extern pros::ADIDigitalIn topLimit;
+
 extern bool SORT_SYS_ENABLE;
+extern bool canLimit;
+extern unsigned int limitPresses;
+
+enum loaderSetting
+{
+    Forward = 0,
+    Backward = 1,
+    Disabled = 2
+};
+bool runningAuton = false;
+//wait until a certain number of balls have gone through
+static void waitUntilPressCount(const unsigned int pressCount, const bool waitUntilHold)
+{
+    static bool printed = false;
+
+    std::cout<<"started wait"<<std::endl;
+    std::cout<<pressCount<<std::endl;
+    std::cout<<limitPresses<<std::endl;
+    while(limitPresses < pressCount)
+    {
+        std::cout<<limitPresses<<std::endl;
+        canLimit = false;
+        if(!printed)
+        {
+            std::cout<<"waiting on limits"<<std::endl;
+            printed = true;
+        }
+
+        continue;
+    }
+    if(waitUntilHold)
+    {
+        std::cout<<"starting wait until hold"<<std::endl;
+        while(topLimit.get_value())
+        {
+            continue;
+        }
+        while(!topLimit.get_value())
+        {
+            continue;
+        }
+        std::cout<<"finished"<<std::endl;
+    }
+    canLimit = true;
+}
+
+//turn using gyro and PID
 static void gyroTurn(const float deg)
 {
 	leftBack.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
@@ -45,17 +94,23 @@ static void gyroTurn(const float deg)
 
 
 static auto chassis = ChassisControllerBuilder()
-    .withMotors(
+    .withMotors
+    (
         20,  // Top left
         11, // Top right (reversed)
         1, // Bottom right (reversed)
         9   // Bottom left
-        
     )
-        .withDimensions(AbstractMotor::gearset::green, {{4_in, 11.5_in}, imev5GreenTPR})
-    .build();
+    .withGains(
+        {0.0025, 0.0005, 0.0001}, // Distance controller gains
+        {0.003, 0, 0.0001}, // Turn controller gains
+        {0.0025, 0.001, 0.0001})  // Angle controller gains (helps drive straight)
 
-  auto xModel = std::dynamic_pointer_cast<XDriveModel>(chassis->getModel());
+    .withDimensions(AbstractMotor::gearset::green, {{4_in, 11.5_in}, imev5GreenTPR})
+    .withOdometry()
+    .buildOdometry();
+
+auto xModel = std::dynamic_pointer_cast<XDriveModel>(chassis->getModel());
 
 //function to see when the robot shoots a ball into the tower.
 static void waitUntilShoot(const uint32_t timeAfterShoot)
@@ -75,51 +130,33 @@ static void strafeAbstract(std::shared_ptr<okapi::XDriveModel>& model, double ve
     model->stop();
     pros::delay(timeToSettle);
 }
-static void swingTurn(const int32_t forwardPower, const int32_t turnPower, const uint32_t timeToRun, const uint32_t driveSettle)
+static void swingTurn(const int32_t forwardPower, const int32_t turnPower, const uint32_t timeToRun, const uint32_t driveSettle, const bool settle)
 {
     setDrive(forwardPower + turnPower, forwardPower - turnPower);
     pros::Task::delay(timeToRun);
     setDrive(0,0);
-    pros::Task::delay(driveSettle);
+    if(settle)
+        pros::Task::delay(driveSettle);
 }
-enum loaderSetting
-{
-    Forward = 0,
-    Backward = 1,
-    Disabled = 2
-};
-static void setLoaders(const loaderSetting setting)
-{
-    if(setting == loaderSetting::Forward)
-    {
-        leftLoader.move(127);
-        rightLoader.move(127);
-    }
-    else if(setting == loaderSetting::Backward)
-    {
-        leftLoader.move(-127);
-        rightLoader.move(-127); 
-    }
-    else if(setting == loaderSetting::Disabled)
-    {
-        leftLoader.move(0);
-        rightLoader.move(0);  
-    }
-    
-}
+
 static void redAuton()
 {
-    //swing into tower
-    swingTurn(70, 30, 500, 500);
-
-     //start lifts and sorting
+    waitUntilPressCount(2, true);
+    setDrive(20, 20);
+    pros::delay(400);
+    setDrive(0,0);
+    return;
+    //start lifts and sorting
     SORT_SYS_ENABLE = true;
     setLoaders(loaderSetting::Forward);
-
+    //swing into tower
+    swingTurn(75, 30, 700, 1000, false);
+    waitUntilPressCount(1, true);
+    
     //Perform loading/sorting procedure
 
     //swing out of tower to begin strafing
-    swingTurn(-90, 35, 400, 750);
+    swingTurn(-90, 35, 700, 750, true);
     setLoaders(loaderSetting::Disabled);
 
     //align for strafing.
@@ -130,29 +167,40 @@ static void redAuton()
 
     //align at tower
     gyroTurn(90);
+    setDrive(50, 50);
+    
+    pros::delay(750);
+    setDrive(0,0);
 
-    //move towards tower
-    chassis->moveDistance(0.5_ft);
+    setDrive(-50, -50);
+        
+    pros::delay(750);
+    setDrive(0,0);
 
-    //wait until scored
-    waitUntilShoot(500);
-
-    chassis->moveDistance(-0.5_ft);
+    gyroTurn(90);
+    pros::delay(500);
 
     //strafe to next tower
     strafeAbstract(xModel, -200, 930, 500);
-    
+
     //swing into tower
-    swingTurn(70, -30, 500, 500);
+    swingTurn(80, 30, 750, 500, true);
 
     setLoaders(loaderSetting::Forward);
+    
 }
 void runAuton()
 {
+    runningAuton = true;
+    chassis->setMaxVelocity(130);
+    
     //init gyro
     imu.reset();
     pros::delay(2000);
 
     redAuton();
+    
+   
+ 
 
 }

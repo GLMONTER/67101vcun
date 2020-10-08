@@ -11,8 +11,8 @@ pros::Motor rightBack(1, true);
 pros::Motor leftBack(9, false);
 
 //includes flywheel, and the two lifts
-pros::Motor topSystem(5, pros::E_MOTOR_GEARSET_18, false);
-pros::Motor bottomSystem(3, pros::E_MOTOR_GEARSET_06, false);
+pros::Motor topSystem(5, pros::E_MOTOR_GEARSET_06, false);
+pros::Motor bottomSystem(19, pros::E_MOTOR_GEARSET_06, false);
 
 //toggles for lift
 static bool buttonToggleR = 0;
@@ -22,24 +22,41 @@ static bool buttonToggleF = 0;
 static bool buttonPressedF = 0;
 
 extern bool sortToggle;
-
-void setDrive(int32_t leftPower, int32_t rightPower)
+enum loaderSetting
+{
+    Forward = 0,
+    Backward = 1,
+    Disabled = 2
+};
+void setDrive(const int32_t leftPower, const int32_t rightPower)
 {
     rightFront.move(rightPower);
     rightBack.move(rightPower);
     leftFront.move(leftPower);
     leftBack.move(leftPower);
-
 }
-void setLoaders(int32_t leftPower, int32_t rightPower)
+
+void setLoaders(const int setting)
 {
-    leftLoader.move(leftPower);
-    rightLoader.move(rightPower);
+    if(setting == loaderSetting::Forward)
+    {
+        leftLoader.move(127);
+        rightLoader.move(127);
+    }
+    else if(setting == loaderSetting::Backward)
+    {
+        leftLoader.move(-127);
+        rightLoader.move(-127); 
+    }
+    else if(setting == loaderSetting::Disabled)
+    {
+        leftLoader.move(0);
+        rightLoader.move(0);  
+    }
 }
 
 void sortFailsafe()
 {
-   
     if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_B))
     {
         SORT_SYS_ENABLE = true;
@@ -69,15 +86,15 @@ void sortFailsafe()
     if(buttonToggleF == true)
     {
         topSystem.move(-127);
-		bottomSystem.move(127);
+		bottomSystem.move(-127);
     }
     //check if other toggle is on if we need to really stop the motor
     else
     {
         if(!buttonToggleR && !buttonToggleF)
         {
-           topSystem.move(-127);
-			bottomSystem.move(127);
+            topSystem.move(-127);
+			bottomSystem.move(-127);
         }
     }
     //go backwards with drum
@@ -103,8 +120,7 @@ void sortFailsafe()
     if(buttonToggleR == true)
     {
         topSystem.move(127);
-		bottomSystem.move(-127);
-
+		bottomSystem.move(127);
     }
     //else, check if the forward toggle is off, then stop.
     else

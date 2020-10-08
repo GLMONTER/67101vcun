@@ -9,13 +9,15 @@ void initialize()
 	pros::Task::delay(250);
 	Trio.move(0);
 */
-	#define BLUE
+	pros::Task pollTask(pollSensors, "poll");
+	#define RED
 	
 	#ifdef BLUE
 	//start the async sort task to begin sorting during driver control.
-	//pros::Task sortTask(sort, reinterpret_cast<void*>(&BLUE_SIG),"test");
-	#else
-	pros::Task sortTask(sort, reinterpret_cast<void*>(&RED_SIG),"test");
+	pros::Task sortTask(sort, reinterpret_cast<void*>(&BLUE_SIG),"vision");
+	#endif
+	#ifdef RED
+	pros::Task sortTask(sort, reinterpret_cast<void*>(&RED_SIG), "vision");
 	#endif
 }
 
@@ -49,9 +51,11 @@ bool canLimit = true;
 
 static bool topToggle = true;
 static bool topPressed;
-//pros::ADIEncoder left('B', 'C');
+
+
 void opcontrol() 
 {
+	/*
 	LV_IMG_DECLARE(vaquita);
 
 	
@@ -60,14 +64,31 @@ void opcontrol()
 	lv_img_set_src(im, &vaquita);
 	lv_obj_set_pos(im,  0, -75);
 	lv_obj_set_drag(im, false);
-
+*/
 	while (true) 
 	{
 		static int i = 0;
 		if(i == 100)
 		{
-			std::string temp = std::to_string(topSystem.get_temperature());
-			controller.print(0, 0, "%f" ,temp.c_str());
+			std::string faultStatus;
+			if(leftBack.get_faults() == pros::motor_fault_e_t::E_MOTOR_FAULT_NO_FAULTS && 
+			leftFront.get_faults() == pros::motor_fault_e_t::E_MOTOR_FAULT_NO_FAULTS && 
+			rightBack.get_faults() == pros::motor_fault_e_t::E_MOTOR_FAULT_NO_FAULTS && 
+			rightFront.get_faults() == pros::motor_fault_e_t::E_MOTOR_FAULT_NO_FAULTS)
+			{
+				faultStatus = "OK";
+			}
+			else
+			{
+				faultStatus == "FAULT!";
+			}
+			
+			std::string topTemp = "TOP:" + std::to_string((int)topSystem.get_temperature()) 
+			+ " BOT:" + std::to_string((int)bottomSystem.get_temperature()) + " DRV STAT:" + faultStatus.c_str();
+	
+
+			controller.print(0, 0, "%s" , topTemp.c_str());
+
 			i = 0;
 		}
 		i++;

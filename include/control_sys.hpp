@@ -3,7 +3,9 @@
 
 void sortFailsafe();
 void setDrive(int32_t leftPower, int32_t rightPower);
-void setLoaders(int32_t leftPower, int32_t rightPower);
+
+
+void setLoaders(const int setting);
 
 extern pros::Controller controller;
 
@@ -17,3 +19,4 @@ extern pros::Motor leftBack;
 
 extern pros::Motor topSystem;
 extern pros::Motor bottomSystem;
+

@@ -7,3 +7,4 @@ extern pros::Vision vSensor;
 extern pros::Imu imu;
 extern pros::ADIDigitalIn topLimit;
 void sort(void* sigPass);
+void pollSensors();
