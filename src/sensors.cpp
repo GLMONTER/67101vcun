@@ -19,9 +19,9 @@ extern bool canLimit;
 
 //tuning variables for the different robots.
 static int32_t delayEject = 250;
-static int32_t bottomSpeed = 127;
-static int32_t topVelocity = 440;
-static int32_t minVelocity = 400;
+static int32_t bottomSpeed = 90;
+int32_t topVelocity = 390;
+static int32_t minVelocity = 350;
 
 //enable/disable sorting task
 bool SORT_SYS_ENABLE = true;
@@ -42,6 +42,8 @@ void pollSensors()
 		pros::delay(10);
 	}
 }
+bool disableTop = false;
+bool disableBottom = false;
 extern bool runningAuton;
 //this function will sort the balls based on the color signature passed in. 
 //The task will start at the beginning of the program with the correct ball color to start.
@@ -82,9 +84,10 @@ void sort(void* sigPass)
 			{
 				topSystem.move_velocity(0);
 				bottomSystem.move(-127);
-				pros::delay(75);
+				pros::delay(50);
 				bottomSystem.move_velocity(0);
-				topSystem.move(127);
+				if(!disableTop)
+					topSystem.move_velocity(topVelocity);
 				runSwitch = true;
 				std::cout<<"LIMIT"<<std::endl;
 				continue;
@@ -122,14 +125,18 @@ void sort(void* sigPass)
 			if(First_rtn.y_middle_coord > Second_rtn.y_middle_coord)
 			{
 				vSensor.set_led(COLOR_GREEN);
-				topSystem.move_velocity(-topVelocity);
-				bottomSystem.move(bottomSpeed);
+				if(!disableTop)
+					topSystem.move_velocity(-topVelocity);
+				if(!disableBottom)
+					bottomSystem.move(bottomSpeed);
 			}
 			else
 			{
 				vSensor.set_led(COLOR_GREEN);
-				topSystem.move_velocity(topVelocity);
-				bottomSystem.move(bottomSpeed);
+				if(!disableTop)
+					topSystem.move_velocity(topVelocity);
+				if(!disableBottom)
+					bottomSystem.move(bottomSpeed);
 			}
 		}
 		//if the alliance color ball was found the just load up
@@ -143,12 +150,15 @@ void sort(void* sigPass)
 			#endif
 			if(topSystem.get_actual_velocity() > minVelocity)
 			{
-				topSystem.move_velocity(topVelocity);
-				bottomSystem.move(bottomSpeed);
+				if(!disableTop)
+					topSystem.move_velocity(topVelocity);
+				if(!disableBottom)
+					bottomSystem.move(bottomSpeed);
 			}
 			else
 			{
-				topSystem.move_velocity(topVelocity);
+				if(!disableTop)
+					topSystem.move_velocity(topVelocity);
 				bottomSystem.move(0);
 			}
 			
@@ -162,8 +172,10 @@ void sort(void* sigPass)
 			#else
 			vSensor.set_led(COLOR_BLUE);
 			#endif
-			topSystem.move_velocity(-topVelocity);
-			bottomSystem.move(bottomSpeed);
+			if(!disableTop)
+				topSystem.move_velocity(-topVelocity);
+			if(!disableBottom)
+				bottomSystem.move(bottomSpeed);
 			pros::delay(delayEject);
 		}
 		//if nothing was found then just load like normal
@@ -171,8 +183,10 @@ void sort(void* sigPass)
 		{
 			vSensor.set_led(COLOR_LIGHT_CORAL);
 
-			topSystem.move_velocity(topVelocity);
-			bottomSystem.move(bottomSpeed);
+			if(!disableTop)
+				topSystem.move_velocity(topVelocity);
+			if(!disableBottom)
+				bottomSystem.move(bottomSpeed);
 		}
 		//make the thread sleep to prevent other threads from being starved of resources.
 		pros::Task::delay(10);

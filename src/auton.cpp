@@ -7,7 +7,9 @@ extern pros::ADIDigitalIn topLimit;
 extern bool SORT_SYS_ENABLE;
 extern bool canLimit;
 extern unsigned int limitPresses;
-
+extern bool disableTop;
+extern bool disableBottom;
+extern int32_t topVelocity;
 enum loaderSetting
 {
     Forward = 0,
@@ -23,6 +25,7 @@ static void waitUntilPressCount(const unsigned int pressCount, const bool waitUn
     std::cout<<"started wait"<<std::endl;
     std::cout<<pressCount<<std::endl;
     std::cout<<limitPresses<<std::endl;
+    canLimit = false;
     while(limitPresses < pressCount)
     {
         std::cout<<limitPresses<<std::endl;
@@ -69,7 +72,7 @@ static void gyroTurn(const float deg)
     float target = deg;
     float Ki = -0.0015;
     float Kd = -0.5;
-    float Kp = -9.0;
+    float Kp = -8.0;
 
     while (abs(error) > 1 || leftBack.get_actual_velocity() > 0.1)
     {
@@ -141,52 +144,62 @@ static void swingTurn(const int32_t forwardPower, const int32_t turnPower, const
 
 static void redAuton()
 {
-    waitUntilPressCount(2, true);
-    setDrive(20, 20);
-    pros::delay(400);
-    setDrive(0,0);
-    return;
     //start lifts and sorting
     SORT_SYS_ENABLE = true;
+    canLimit = true;
     setLoaders(loaderSetting::Forward);
     //swing into tower
-    swingTurn(75, 30, 700, 1000, false);
+    swingTurn(85, 19, 500, 1000, false);
     waitUntilPressCount(1, true);
     
     //Perform loading/sorting procedure
-
+    disableTop = true;
+    topSystem.move(0);
     //swing out of tower to begin strafing
-    swingTurn(-90, 35, 700, 750, true);
-    setLoaders(loaderSetting::Disabled);
-
+    swingTurn(-90, 35, 600, 750, true);
+    //setLoaders(loaderSetting::Backward);
+   
     //align for strafing.
     gyroTurn(90);
-
+    topVelocity = 500;
+   
+     
     //strafe right for next tower
-    strafeAbstract(xModel, -200, 930, 500);
-
+    strafeAbstract(xModel, -200, 1050, 400);
+    disableTop = false;
     //align at tower
     gyroTurn(90);
-    setDrive(50, 50);
+    //setLoaders(loaderSetting::Forward);
+   
+    setDrive(70, 70);
     
-    pros::delay(750);
+    pros::delay(400);
+    canLimit = false;
+    setLoaders(loaderSetting::Disabled);
+    pros::delay(300);
     setDrive(0,0);
+    
+    pros::delay(500);
+    //waitUntilPressCount(3, true);
 
-    setDrive(-50, -50);
+    setDrive(-100, -100);
+    topVelocity = 410;
         
-    pros::delay(750);
+    pros::delay(250);
     setDrive(0,0);
-
+    canLimit = true;
     gyroTurn(90);
     pros::delay(500);
 
     //strafe to next tower
-    strafeAbstract(xModel, -200, 930, 500);
+    strafeAbstract(xModel, -200, 1300, 500);
 
     //swing into tower
-    swingTurn(80, 30, 750, 500, true);
+     setLoaders(loaderSetting::Forward);
+    swingTurn(83, 28, 750, 500, true);
 
-    setLoaders(loaderSetting::Forward);
+   gyroTurn(135);
+    canLimit = false;
     
 }
 void runAuton()
