@@ -10,6 +10,7 @@ void initialize()
 
 	//release hood by spinning Trio.
 	topSystem.move(127);
+	bottomSystem.move(127);
 	setLoaders(1);
 	pros::Task::delay(500);
 	topSystem.move(0);
@@ -18,7 +19,7 @@ void initialize()
 
 
 	pros::Task pollTask(pollSensors, "poll");
-	#define RED
+	#define BLUE
 	
 	#ifdef BLUE
 	//start the async sort task to begin sorting during driver control.

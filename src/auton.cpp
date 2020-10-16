@@ -232,6 +232,6 @@ static void newHomeRow()
 void runAuton()
 {
     runningAuton = true;
-    twoLeft();
+    newHomeRow();
     runningAuton = false;
 }

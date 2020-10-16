@@ -15,7 +15,7 @@ pros::ADIDigitalIn topLimit('A');
 //bool that holds the state of the limiter
 extern bool canLimit;
 //define the alliance color to sort the correct ball color.
-#define BLUE
+#define RED
 #define BEN
 //tuning variables for the different robots.
 static int32_t delayEject = 250;
@@ -23,7 +23,7 @@ static int32_t bottomSpeed = 90;
 //ben, 600, 400, calvin, 400, 350
 #ifdef BEN
 int32_t topVelocity = 430;
-static int32_t minVelocity = 390;
+static int32_t minVelocity = 420;
 #endif
 #ifdef CAL
 int32_t topVelocity = 400;
