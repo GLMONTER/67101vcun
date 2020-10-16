@@ -3,12 +3,20 @@
 
 void initialize()
 {
-/*
+	//init gyro
+    imu.reset();
+    pros::delay(2000);
+	pros::lcd::initialize();
+
 	//release hood by spinning Trio.
-	Trio.move(127);
-	pros::Task::delay(250);
-	Trio.move(0);
-*/
+	topSystem.move(127);
+	setLoaders(1);
+	pros::Task::delay(500);
+	topSystem.move(0);
+	//reverse loaders for deplyoment
+	
+
+
 	pros::Task pollTask(pollSensors, "poll");
 	#define RED
 	
@@ -47,9 +55,9 @@ static bool flyPressed = 0;
 bool sortToggle = 1;
 static bool sortPressed = 0;
 
-bool canLimit = true;
+bool canLimit = false;
 
-static bool topToggle = true;
+static bool topToggle = false;
 static bool topPressed;
 
 
@@ -104,7 +112,7 @@ void opcontrol()
 		
 
 		//a load toggle to allow shooting.
-		if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_UP))
+		if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT))
 		{
 			if(!topPressed)
 			{
@@ -148,28 +156,7 @@ void opcontrol()
 			sortFailsafe();
 		}
 
-		//Trio CONTROLER and im big gey
-		if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2))
-		{
-			if(!flyPressed)
-			{
-				flyToggle = 1 - flyToggle;
-
-				flyPressed = 1;
-			}
-		}
-		else
-			flyPressed = 0;
-
-		//if the toggle is enabled then start the Trio, if disabled then stop it
-		if(flyToggle)
-		{
-			//Trio.move(-127);
-		}
-		else
-		{
-			//Trio.move(0);
-		}
+		
 
 		//LOADING SYSTEM.
 		if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1))

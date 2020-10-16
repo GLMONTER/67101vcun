@@ -15,13 +15,20 @@ pros::ADIDigitalIn topLimit('A');
 //bool that holds the state of the limiter
 extern bool canLimit;
 //define the alliance color to sort the correct ball color.
-#define RED
-
+#define BLUE
+#define BEN
 //tuning variables for the different robots.
 static int32_t delayEject = 250;
 static int32_t bottomSpeed = 90;
-int32_t topVelocity = 390;
+//ben, 600, 400, calvin, 400, 350
+#ifdef BEN
+int32_t topVelocity = 430;
+static int32_t minVelocity = 390;
+#endif
+#ifdef CAL
+int32_t topVelocity = 400;
 static int32_t minVelocity = 350;
+#endif
 
 //enable/disable sorting task
 bool SORT_SYS_ENABLE = true;
@@ -55,7 +62,7 @@ void sort(void* sigPass)
 
 	//set the red and blue signatures to be referenced later.
 	vSensor.set_signature(ALLIANCE_SIG, &sig);
-	#ifdef BLUE
+	#ifdef RED
 	vSensor.set_signature(ENEMEY_SIG, &RED_SIG);
 	#else
 	vSensor.set_signature(ENEMEY_SIG, &BLUE_SIG);
@@ -77,14 +84,16 @@ void sort(void* sigPass)
 
 		if(runningAuton)
 		{
+			//std::cout<<"auton"<<std::endl;
 			static bool runSwitch = false;
 
 			//if the top limiter sensor is hit and the program is allowed to limit, stop loading more.
 			if(topLimit.get_value() && canLimit && !runSwitch)
 			{
+				
 				topSystem.move_velocity(0);
-				bottomSystem.move(-127);
-				pros::delay(50);
+			
+				
 				bottomSystem.move_velocity(0);
 				if(!disableTop)
 					topSystem.move_velocity(topVelocity);
@@ -110,7 +119,7 @@ void sort(void* sigPass)
 			{
 				bottomSystem.move_velocity(0);
 				topSystem.move_velocity(0);
-
+				
 				continue;
 			}
 		}
@@ -159,9 +168,8 @@ void sort(void* sigPass)
 			{
 				if(!disableTop)
 					topSystem.move_velocity(topVelocity);
-				bottomSystem.move(0);
+				bottomSystem.move_velocity(0);
 			}
-			
 		}
 		//if the alliance ball is not detected then search for the enemy ball for discarding.
 		else

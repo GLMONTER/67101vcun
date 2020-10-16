@@ -1,6 +1,6 @@
 #include"main.h"
 
-pros::Imu imu(21);
+pros::Imu imu(18);
 
 extern pros::ADIDigitalIn topLimit;
 
@@ -10,6 +10,7 @@ extern unsigned int limitPresses;
 extern bool disableTop;
 extern bool disableBottom;
 extern int32_t topVelocity;
+#define BEN
 enum loaderSetting
 {
     Forward = 0,
@@ -28,15 +29,13 @@ static void waitUntilPressCount(const unsigned int pressCount, const bool waitUn
     canLimit = false;
     while(limitPresses < pressCount)
     {
-        std::cout<<limitPresses<<std::endl;
+        //std::cout<<limitPresses<<std::endl;
         canLimit = false;
         if(!printed)
         {
             std::cout<<"waiting on limits"<<std::endl;
             printed = true;
         }
-
-        continue;
     }
     if(waitUntilHold)
     {
@@ -71,8 +70,8 @@ static void gyroTurn(const float deg)
 
     float target = deg;
     float Ki = -0.0015;
-    float Kd = -0.5;
-    float Kp = -8.0;
+    float Kd = -0.6;
+    float Kp = -6.5;
 
     while (abs(error) > 1 || leftBack.get_actual_velocity() > 0.1)
     {
@@ -87,7 +86,11 @@ static void gyroTurn(const float deg)
         derivative = error - perror;
         perror = error;
         value = (integral*Ki) + (derivative*Kd) + (error*Kp);
-        setDrive(-value, value);
+        if(value > 0)
+            setDrive(-value, value);
+        else
+            setDrive(value, -value);
+        
         
 
         pros::delay(5);
@@ -104,10 +107,12 @@ static auto chassis = ChassisControllerBuilder()
         1, // Bottom right (reversed)
         9   // Bottom left
     )
+    /*
     .withGains(
         {0.0025, 0.0005, 0.0001}, // Distance controller gains
-        {0.003, 0, 0.0001}, // Turn controller gains
-        {0.0025, 0.001, 0.0001})  // Angle controller gains (helps drive straight)
+        {0.0025, 0.0005, 0.0001}, // Turn controller gains
+        {0.0025, 0.0005, 0.0001})  // Angle controller gains (helps drive straight)
+        */
 
     .withDimensions(AbstractMotor::gearset::green, {{4_in, 11.5_in}, imev5GreenTPR})
     .withOdometry()
@@ -141,58 +146,92 @@ static void swingTurn(const int32_t forwardPower, const int32_t turnPower, const
     if(settle)
         pros::Task::delay(driveSettle);
 }
-
-static void redAuton()
+static void newhomwRow()
 {
+    chassis->setMaxVelocity(130);
+    
     //start lifts and sorting
     SORT_SYS_ENABLE = true;
+    canLimit = false;
+    setLoaders(loaderSetting::Forward);
+
+    swingTurn(80, 20, 1650, 600, true);
+    pros::Task::delay(700);
+     
+    chassis->moveDistance(-3.25_ft);
+    setLoaders(loaderSetting::Forward);
+    pros::delay(750);
+   
+    //Perform loading/sorting procedure
+    
+    chassis->setMaxVelocity(130);
+    chassis->turnAngle(250_deg);
+    chassis->setMaxVelocity(125);
+    chassis->moveDistance(2.75_ft);
+    gyroTurn(-179);
+    /*
+    while(true)
+    {
+        pros::lcd::print(0, "%f", imu.get_yaw());
+        pros::delay(10);
+    }
+    */
+    pros::lcd::print(0, "%f", imu.get_yaw());
+    //chassis->turnAngle(-50_deg);
+    chassis->setMaxVelocity(80);
+    chassis->moveDistance(1.6_ft);
+    pros::delay(2000);
+    chassis->moveDistance(-2_ft);
+}
+static void homeRow()
+{
     canLimit = true;
+        //start lifts and sorting
+    SORT_SYS_ENABLE = true;
+    
     setLoaders(loaderSetting::Forward);
     //swing into tower
-    swingTurn(85, 19, 500, 1000, false);
+    swingTurn(75, 33, 600, 1000, false);
     waitUntilPressCount(1, true);
     
-    //Perform loading/sorting procedure
-    disableTop = true;
-    topSystem.move(0);
+ 
+   
     //swing out of tower to begin strafing
     swingTurn(-90, 35, 600, 750, true);
     //setLoaders(loaderSetting::Backward);
    
     //align for strafing.
     gyroTurn(90);
-    topVelocity = 500;
+    //topVelocity = 500;
    
-     
+
     //strafe right for next tower
     strafeAbstract(xModel, -200, 1050, 400);
-    disableTop = false;
+    topVelocity = 600;
     //align at tower
     gyroTurn(90);
     //setLoaders(loaderSetting::Forward);
    
-    setDrive(70, 70);
-    
-    pros::delay(400);
+    chassis->setMaxVelocity(130);
+    chassis->moveDistance(0.9_ft);
+  
     canLimit = false;
+    waitUntilPressCount(3, false);
+    //setLoaders(loaderSetting::Disabled);
+   
+    canLimit = true;
     setLoaders(loaderSetting::Disabled);
-    pros::delay(300);
-    setDrive(0,0);
     
-    pros::delay(500);
-    //waitUntilPressCount(3, true);
 
-    setDrive(-100, -100);
+    chassis->moveDistance(-0.75_ft);
     topVelocity = 410;
         
-    pros::delay(250);
-    setDrive(0,0);
-    canLimit = true;
+  
     gyroTurn(90);
     pros::delay(500);
 
     //strafe to next tower
-    strafeAbstract(xModel, -200, 1300, 500);
+    strafeAbstract(xModel, -200, 1400, 500);
 
     //swing into tower
      setLoaders(loaderSetting::Forward);
@@ -200,20 +239,88 @@ static void redAuton()
 
    gyroTurn(135);
     canLimit = false;
-    
 }
+static void rightTwo()
+{
+    #ifdef CAL
+    chassis->setMaxVelocity(130);
+    SORT_SYS_ENABLE = false;
+    topSystem.move(127);
+    pros::delay(500);
+    topSystem.move(0);
+    //start lifts and sorting
+    SORT_SYS_ENABLE = true;
+    canLimit = false;
+    setLoaders(loaderSetting::Forward);
+  
+    chassis->driveToPoint({2.275_ft, 0.25_ft});
+    //pros::delay(5000);
+    gyroTurn(70);
+      chassis->setMaxVelocity(65);
+    chassis->moveDistance(0.95_ft);
+
+    //swing into tower
+    
+    waitUntilPressCount(1, true);
+    setLoaders(loaderSetting::Backward);
+    //Perform loading/sorting procedure
+    disableTop = true;
+    topSystem.move(0);
+
+    chassis->setMaxVelocity(140);
+    chassis->moveDistance(-0.5_ft);
+    setLoaders(loaderSetting::Forward);
+    chassis->driveToPoint({2.5_ft, -1.75_ft});
+    chassis->turnAngle(45_deg);
+    chassis->moveDistance(0.5_ft);
+    waitUntilPressCount(3, true);
+    #endif
+
+    #ifdef BEN
+chassis->setMaxVelocity(130);
+    SORT_SYS_ENABLE = false;
+    topSystem.move(127);
+    pros::delay(500);
+    topSystem.move(0);
+    //start lifts and sorting
+    SORT_SYS_ENABLE = true;
+    canLimit = false;
+    setLoaders(loaderSetting::Forward);
+  
+    chassis->driveToPoint({2.1_ft, 0.25_ft});
+    //pros::delay(5000);
+    gyroTurn(70);
+      chassis->setMaxVelocity(65);
+    chassis->moveDistance(1.75_ft);
+
+    //swing into tower
+    
+    waitUntilPressCount(1, true);
+    setLoaders(loaderSetting::Backward);
+    //Perform loading/sorting procedure
+    disableTop = true;
+    topSystem.move(0);
+
+    chassis->setMaxVelocity(140);
+    chassis->moveDistance(-0.5_ft);
+    setLoaders(loaderSetting::Forward);
+    chassis->driveToPoint({2.5_ft, -1.75_ft});
+    chassis->turnAngle(45_deg);
+    chassis->moveDistance(0.5_ft);
+    waitUntilPressCount(3, true);
+    #endif
+}
+
 void runAuton()
 {
     runningAuton = true;
-    chassis->setMaxVelocity(130);
     
-    //init gyro
-    imu.reset();
-    pros::delay(2000);
+   canLimit = true;
+    
 
-    redAuton();
+    newhomwRow();
     
    
  
-
+runningAuton = false;
 }

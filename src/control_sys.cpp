@@ -12,7 +12,16 @@ pros::Motor leftBack(9, false);
 
 //includes flywheel, and the two lifts
 pros::Motor topSystem(5, pros::E_MOTOR_GEARSET_06, false);
+
+#define BEN
+
+#ifdef CAL
 pros::Motor bottomSystem(19, pros::E_MOTOR_GEARSET_06, false);
+#endif
+
+#ifdef BEN
+pros::Motor bottomSystem(19, pros::E_MOTOR_GEARSET_06, true);
+#endif
 
 //toggles for lift
 static bool buttonToggleR = 0;
