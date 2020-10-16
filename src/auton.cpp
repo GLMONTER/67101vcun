@@ -146,7 +146,60 @@ static void swingTurn(const int32_t forwardPower, const int32_t turnPower, const
     if(settle)
         pros::Task::delay(driveSettle);
 }
-static void newhomwRow()
+static void twoRight()
+{
+    chassis->setMaxVelocity(130);
+    
+    //start lifts and sorting
+    SORT_SYS_ENABLE = true;
+    canLimit = false;
+    setLoaders(loaderSetting::Forward);
+
+    swingTurn(80, 20, 1650, 600, true);
+    pros::Task::delay(700);
+     
+    chassis->moveDistance(-1.5_ft);
+    setLoaders(loaderSetting::Forward);
+    pros::delay(750);
+}
+static void twoLeft()
+{
+    chassis->setMaxVelocity(130);
+
+    //start lifts and sorting
+    SORT_SYS_ENABLE = true;
+    canLimit = false;
+    setLoaders(loaderSetting::Forward);
+  
+    chassis->driveToPoint({2.1_ft, 0.25_ft});
+    //pros::delay(5000);
+    gyroTurn(-75);
+      chassis->setMaxVelocity(65);
+    chassis->moveDistance(1.65_ft);
+
+    //swing into tower
+    pros::delay(1500);
+    chassis->setMaxVelocity(140);
+    chassis->moveDistance(-1_ft);
+   
+    /*
+    chassis->setMaxVelocity(130);
+    
+    //start lifts and sorting
+    SORT_SYS_ENABLE = true;
+    canLimit = false;
+    setLoaders(loaderSetting::Forward);
+
+    swingTurn(80, -11, 1400, 600, true);
+    setLoaders(loaderSetting::Backward);
+    pros::Task::delay(700);
+     
+    chassis->moveDistance(-1.5_ft);
+    setLoaders(loaderSetting::Forward);
+    pros::delay(750);
+    */
+}
+static void newHomeRow()
 {
     chassis->setMaxVelocity(130);
     
@@ -161,166 +214,24 @@ static void newhomwRow()
     chassis->moveDistance(-3.25_ft);
     setLoaders(loaderSetting::Forward);
     pros::delay(750);
-   
-    //Perform loading/sorting procedure
     
     chassis->setMaxVelocity(130);
     chassis->turnAngle(250_deg);
     chassis->setMaxVelocity(125);
     chassis->moveDistance(2.75_ft);
     gyroTurn(-179);
-    /*
-    while(true)
-    {
-        pros::lcd::print(0, "%f", imu.get_yaw());
-        pros::delay(10);
-    }
-    */
+ 
     pros::lcd::print(0, "%f", imu.get_yaw());
-    //chassis->turnAngle(-50_deg);
+    
     chassis->setMaxVelocity(80);
     chassis->moveDistance(1.6_ft);
     pros::delay(2000);
     chassis->moveDistance(-2_ft);
 }
-static void homeRow()
-{
-    canLimit = true;
-        //start lifts and sorting
-    SORT_SYS_ENABLE = true;
-    
-    setLoaders(loaderSetting::Forward);
-    //swing into tower
-    swingTurn(75, 33, 600, 1000, false);
-    waitUntilPressCount(1, true);
-    
- 
-   
-    //swing out of tower to begin strafing
-    swingTurn(-90, 35, 600, 750, true);
-    //setLoaders(loaderSetting::Backward);
-   
-    //align for strafing.
-    gyroTurn(90);
-    //topVelocity = 500;
-   
-
-    //strafe right for next tower
-    strafeAbstract(xModel, -200, 1050, 400);
-    topVelocity = 600;
-    //align at tower
-    gyroTurn(90);
-    //setLoaders(loaderSetting::Forward);
-   
-    chassis->setMaxVelocity(130);
-    chassis->moveDistance(0.9_ft);
-  
-    canLimit = false;
-    waitUntilPressCount(3, false);
-    //setLoaders(loaderSetting::Disabled);
-   
-    canLimit = true;
-    setLoaders(loaderSetting::Disabled);
-    
-
-    chassis->moveDistance(-0.75_ft);
-    topVelocity = 410;
-        
-  
-    gyroTurn(90);
-    pros::delay(500);
-
-    //strafe to next tower
-    strafeAbstract(xModel, -200, 1400, 500);
-
-    //swing into tower
-     setLoaders(loaderSetting::Forward);
-    swingTurn(83, 28, 750, 500, true);
-
-   gyroTurn(135);
-    canLimit = false;
-}
-static void rightTwo()
-{
-    #ifdef CAL
-    chassis->setMaxVelocity(130);
-    SORT_SYS_ENABLE = false;
-    topSystem.move(127);
-    pros::delay(500);
-    topSystem.move(0);
-    //start lifts and sorting
-    SORT_SYS_ENABLE = true;
-    canLimit = false;
-    setLoaders(loaderSetting::Forward);
-  
-    chassis->driveToPoint({2.275_ft, 0.25_ft});
-    //pros::delay(5000);
-    gyroTurn(70);
-      chassis->setMaxVelocity(65);
-    chassis->moveDistance(0.95_ft);
-
-    //swing into tower
-    
-    waitUntilPressCount(1, true);
-    setLoaders(loaderSetting::Backward);
-    //Perform loading/sorting procedure
-    disableTop = true;
-    topSystem.move(0);
-
-    chassis->setMaxVelocity(140);
-    chassis->moveDistance(-0.5_ft);
-    setLoaders(loaderSetting::Forward);
-    chassis->driveToPoint({2.5_ft, -1.75_ft});
-    chassis->turnAngle(45_deg);
-    chassis->moveDistance(0.5_ft);
-    waitUntilPressCount(3, true);
-    #endif
-
-    #ifdef BEN
-chassis->setMaxVelocity(130);
-    SORT_SYS_ENABLE = false;
-    topSystem.move(127);
-    pros::delay(500);
-    topSystem.move(0);
-    //start lifts and sorting
-    SORT_SYS_ENABLE = true;
-    canLimit = false;
-    setLoaders(loaderSetting::Forward);
-  
-    chassis->driveToPoint({2.1_ft, 0.25_ft});
-    //pros::delay(5000);
-    gyroTurn(70);
-      chassis->setMaxVelocity(65);
-    chassis->moveDistance(1.75_ft);
-
-    //swing into tower
-    
-    waitUntilPressCount(1, true);
-    setLoaders(loaderSetting::Backward);
-    //Perform loading/sorting procedure
-    disableTop = true;
-    topSystem.move(0);
-
-    chassis->setMaxVelocity(140);
-    chassis->moveDistance(-0.5_ft);
-    setLoaders(loaderSetting::Forward);
-    chassis->driveToPoint({2.5_ft, -1.75_ft});
-    chassis->turnAngle(45_deg);
-    chassis->moveDistance(0.5_ft);
-    waitUntilPressCount(3, true);
-    #endif
-}
 
 void runAuton()
 {
     runningAuton = true;
-    
-   canLimit = true;
-    
-
-    newhomwRow();
-    
-   
- 
-runningAuton = false;
+    twoLeft();
+    runningAuton = false;
 }
