@@ -31,12 +31,14 @@ static bool buttonToggleF = 0;
 static bool buttonPressedF = 0;
 
 extern bool sortToggle;
+
 enum loaderSetting
 {
     Forward = 0,
     Backward = 1,
     Disabled = 2
 };
+
 void setDrive(const int32_t leftPower, const int32_t rightPower)
 {
     rightFront.move(rightPower);

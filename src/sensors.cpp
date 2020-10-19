@@ -14,16 +14,20 @@ pros::ADIDigitalIn topLimit('A');
 
 //bool that holds the state of the limiter
 extern bool canLimit;
+
 //define the alliance color to sort the correct ball color.
 #define RED
+//define robot user
 #define BEN
+
 //tuning variables for the different robots.
-static int32_t delayEject = 250;
+static int32_t delayEject = 500;
 static int32_t bottomSpeed = 90;
+
 //ben, 600, 400, calvin, 400, 350
 #ifdef BEN
-int32_t topVelocity = 430;
-static int32_t minVelocity = 420;
+int32_t topVelocity = 480;
+static int32_t minVelocity = 435;
 #endif
 #ifdef CAL
 int32_t topVelocity = 400;
@@ -49,9 +53,11 @@ void pollSensors()
 		pros::delay(10);
 	}
 }
+
 bool disableTop = false;
 bool disableBottom = false;
 extern bool runningAuton;
+
 //this function will sort the balls based on the color signature passed in. 
 //The task will start at the beginning of the program with the correct ball color to start.
 void sort(void* sigPass)
@@ -90,9 +96,7 @@ void sort(void* sigPass)
 			//if the top limiter sensor is hit and the program is allowed to limit, stop loading more.
 			if(topLimit.get_value() && canLimit && !runSwitch)
 			{
-				
 				topSystem.move_velocity(0);
-			
 				
 				bottomSystem.move_velocity(0);
 				if(!disableTop)
@@ -124,8 +128,6 @@ void sort(void* sigPass)
 			}
 		}
 		
-		
-
         /*255 returns if no objects of stated signature is found.*/
 
 		//if both sigs are found then sort based on color and positioning

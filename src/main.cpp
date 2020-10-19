@@ -8,16 +8,6 @@ void initialize()
     pros::delay(2000);
 	pros::lcd::initialize();
 
-	//release hood by spinning Trio.
-	topSystem.move(127);
-	bottomSystem.move(127);
-	setLoaders(1);
-	pros::Task::delay(500);
-	topSystem.move(0);
-	//reverse loaders for deplyoment
-	
-
-
 	pros::Task pollTask(pollSensors, "poll");
 	#define BLUE
 	
