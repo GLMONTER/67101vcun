@@ -40,6 +40,9 @@ static void waitUntilPressCount(const unsigned int pressCount, const bool waitUn
     
     while(limitPresses < pressCount)
     {
+        std::cout<< " Limit : " <<limitPresses<<std::endl;
+        std::cout<< " PRESS : " <<pressCount<<std::endl;
+        pros::delay(100);
         //std::cout<<limitPresses<<std::endl;
         canLimit = false;
         if(!printed)
@@ -237,6 +240,7 @@ void runAuton()
 {
     init();
     runningAuton = true;
-    twoRight();
+    waitUntilPressCount(2, true);
+    strafeAbstract(xModel, -150, 1000, 0);
     runningAuton = false;
 }

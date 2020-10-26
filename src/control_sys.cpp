@@ -68,13 +68,6 @@ void setLoaders(const int setting)
 
 void sortFailsafe()
 {
-    if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_B))
-    {
-        SORT_SYS_ENABLE = true;
-        sortToggle = true;
-        return;
-    }
-
     //go forward with drum
     if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_A))
     {

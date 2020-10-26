@@ -16,18 +16,18 @@ pros::ADIDigitalIn topLimit('A');
 extern bool canLimit;
 
 //define the alliance color to sort the correct ball color.
-#define RED
+#define BLUE
 //define robot user
 #define BEN
 
 //tuning variables for the different robots.
 static int32_t delayEject = 500;
-static int32_t bottomSpeed = 90;
+static int32_t bottomSpeed = 127;
 
 //ben, 600, 400, calvin, 400, 350
 #ifdef BEN
-int32_t topVelocity = 480;
-static int32_t minVelocity = 435;
+int32_t topVelocity = 375;
+static int32_t minVelocity = 350;
 #endif
 #ifdef CAL
 int32_t topVelocity = 400;
@@ -122,7 +122,7 @@ void sort(void* sigPass)
 			if(topLimit.get_value() && canLimit)
 			{
 				bottomSystem.move_velocity(0);
-				topSystem.move_velocity(0);
+				//topSystem.move_velocity(0);
 				
 				continue;
 			}

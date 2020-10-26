@@ -9,7 +9,7 @@ void initialize()
 	pros::lcd::initialize();
 
 	pros::Task pollTask(pollSensors, "poll");
-	#define BLUE
+	#define RED
 	
 	#ifdef BLUE
 	//start the async sort task to begin sorting during driver control.
