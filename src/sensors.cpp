@@ -17,22 +17,14 @@ extern bool canLimit;
 
 //define the alliance color to sort the correct ball color.
 #define BLUE
-//define robot user
-#define BEN
 
-//tuning variables for the different robots.
+//tuning variables
 static int32_t delayEject = 500;
 static int32_t bottomSpeed = 127;
 
-//ben, 600, 400, calvin, 400, 350
-#ifdef BEN
 int32_t topVelocity = 375;
 static int32_t minVelocity = 350;
-#endif
-#ifdef CAL
-int32_t topVelocity = 400;
-static int32_t minVelocity = 350;
-#endif
+
 
 //enable/disable sorting task
 bool SORT_SYS_ENABLE = true;
