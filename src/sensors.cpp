@@ -10,7 +10,7 @@ pros::vision_signature_s_t RED_SIG = pros::Vision::signature_from_utility(2, 796
 
 //Sensor init
 pros::Vision vSensor(8, pros::E_VISION_ZERO_CENTER);
-pros::ADIDigitalIn topLimit('A');
+pros::ADIDigitalIn topLimit(8);
 
 //bool that holds the state of the limiter
 extern bool canLimit;

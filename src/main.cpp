@@ -50,7 +50,7 @@ bool canLimit = false;
 
 static bool topToggle = false;
 static bool topPressed;
-
+extern void trackPosition();
 
 void opcontrol() 
 {
@@ -63,6 +63,12 @@ void opcontrol()
 	lv_img_set_src(im, &vaquita);
 	lv_obj_set_pos(im,  0, -75);
 	lv_obj_set_drag(im, false);
+*/	
+/*
+while(true)
+{
+	trackPosition();
+}
 */
 	while (true) 
 	{

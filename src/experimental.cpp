@@ -1,4 +1,4 @@
-#include<main.h>
+#include"main.h"
 //for trig functions
 #include<cmath>
 
@@ -7,10 +7,22 @@
 #define L_R_TRACKING_DISTANCE 5.0
 #define M_TRACKING_DISTANCE 7.0
 
-pros::ADIEncoder leftEncoder(1, 2, false);
-pros::ADIEncoder rightEncoder(1, 2, false);
-pros::ADIEncoder middleEncoder(1, 2, false);
-
+pros::ADIEncoder leftEncoder(3, 4, true);
+pros::ADIEncoder rightEncoder(1, 2, true);
+pros::ADIEncoder middleEncoder(5, 6, false);
+/*
+void writeEncoder()
+{
+    while(true)
+    {
+        std::cout<<"Left : "<<leftEncoder.get_value()<<std::endl;
+        std::cout<<"Right : "<<rightEncoder.get_value()<<std::endl;
+        std::cout<<"Middle : "<<middleEncoder.get_value()<<std::endl;
+        pros::delay(100);
+    }
+    
+}
+*/
 struct Position
 {
     float a;
@@ -21,7 +33,7 @@ struct Position
     int32_t lastMiddle;
 };
 
-Position globalPosition;
+Position globalPos;
 float globalRotation;
 
 void setDriveSpec(const int32_t leftFrontV,const int32_t leftBackV,const int32_t rightFrontV,const int32_t rightBackV)
@@ -33,18 +45,18 @@ void setDriveSpec(const int32_t leftFrontV,const int32_t leftBackV,const int32_t
 }
 void trackPosition()
 {
-    const int32_t leftEncoderValue = leftEncoder.get_value();
-    const int32_t rightEncoderValue = rightEncoder.get_value();
-    const int32_t middleEncoderValue = middleEncoder.get_value();
+    int32_t leftEncoderValue = leftEncoder.get_value();
+    int32_t rightEncoderValue = rightEncoder.get_value();
+    int32_t middleEncoderValue = middleEncoder.get_value();
 
     float leftMovement = (leftEncoderValue - globalPos.lastLeft) * SPIN_TO;
     float rightMovement = (rightEncoderValue - globalPos.lastRight) * SPIN_TO;
     float middleMovement = (middleEncoderValue - globalPos.lastMiddle) * SPIN_TO;
 
 
-    globalPos.lastLeft = leftMovement;
-    globalPos.lastRight = rightMovement;
-    globalPos.lastMiddle = middleMovement;
+    globalPos.lastLeft = leftEncoderValue;
+    globalPos.lastRight = rightEncoderValue;
+    globalPos.lastMiddle = middleEncoderValue;
 
     float hypotenuse;
     float halfOfAngleTraveled;
@@ -82,6 +94,11 @@ void trackPosition()
     globalPos.x += angleTraveledRear * cosP;
 
     globalPos.a = fullAngleTraveled;
+    pros::lcd::print(0, "x :  %f\n", globalPos.x);
+    pros::lcd::print(1, "y :  %f\n", globalPos.y);
+    
+
+
     pros::delay(5);
 }
 //PID function for the x axis
@@ -97,7 +114,7 @@ float getNewX(const float target)
     const float Kd = -0.6f;
     const float Kp = -6.5f;
 
-    error = target - globalPosition.x;
+    error = target - globalPos.x;
     integral = integral + error;
     if(abs(error) < 0.25f)
     {
@@ -121,7 +138,7 @@ float getNewY(const float target)
     const float Kd = -0.6f;
     const float Kp = -6.5f;
 
-    error = target - globalPosition.x;
+    error = target - globalPos.x;
     integral = integral + error;
     if(abs(error) < 0.25f)
     {
@@ -147,7 +164,7 @@ float getNewAngle(const float target)
     //subject to change heading for yaw
     error = target - imu.get_heading();
     integral = integral + error;
-    if(abs(error) < 1f)
+    if(abs(error) < 1.0f)
     {
         integral = 0.0f;
     }
@@ -161,8 +178,8 @@ void moveToPoint(const float x, const float y, const float angle)
 {
     while(leftFront.get_actual_velocity() > 3 && leftBack.get_actual_velocity() > 3 
     && rightFront.get_actual_velocity() > 3 && rightBack.get_actual_velocity() > 3 && 
-    (std::abs(globalPosition.x - x) < 0.25) && (std::abs(globalPosition.y - y) < 0.25) 
-    && std::abs(globalRotation.a - angle))
+    (std::abs(globalPos.x - x) < 0.25) && (std::abs(globalPos.y - y) < 0.25) 
+    && std::abs(globalPos.a - angle))
     {
         float tempY = getNewY(y);
         float tempX = getNewX(x);

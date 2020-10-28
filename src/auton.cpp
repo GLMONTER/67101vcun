@@ -1,7 +1,7 @@
 #include"main.h"
 
 pros::Imu imu(18);
-
+/*
 extern pros::ADIDigitalIn topLimit;
 
 extern bool SORT_SYS_ENABLE;
@@ -27,7 +27,9 @@ static void init()
 	topSystem.move(0);
 	//reverse loaders for deplyoment
 }
+*/
 bool runningAuton = false;
+/*
 //wait until a certain number of balls have gone through
 static void waitUntilPressCount(const unsigned int pressCount, const bool waitUntilHold)
 {
@@ -123,7 +125,7 @@ static auto chassis = ChassisControllerBuilder()
         {0.0025, 0.0005, 0.0001}, // Distance controller gains
         {0.0025, 0.0005, 0.0001}, // Turn controller gains
         {0.0025, 0.0005, 0.0001})  // Angle controller gains (helps drive straight)
-        */
+        
 
     .withDimensions(AbstractMotor::gearset::green, {{4_in, 11.5_in}, imev5GreenTPR})
     .withOdometry()
@@ -235,12 +237,15 @@ static void newHomeRow()
     pros::delay(1500);
     chassis->moveDistance(-2_ft);
 }
+*/
 //actually running the auton
 void runAuton()
 {
+    /*
     init();
     runningAuton = true;
     waitUntilPressCount(2, true);
     strafeAbstract(xModel, -150, 1000, 0);
     runningAuton = false;
+    */
 }
