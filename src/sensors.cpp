@@ -5,12 +5,13 @@
 #define ENEMEY_SIG 2
 
 //signatures generated using the vision utility	
-pros::vision_signature_s_t BLUE_SIG = pros::Vision::signature_from_utility(1, -3719, -3175, -3446, 10543, 14845, 12694, 2.500, 0);
+pros::vision_signature_s_t BLUE_SIG = pros::Vision::signature_from_utility(2, -2017, -533, -1276, 2419, 4497, 3458, 1.000, 0);
 pros::vision_signature_s_t RED_SIG = pros::Vision::signature_from_utility(2, 7969, 10049, 9010, -447, 815, 184, 2.500, 0);
+
 
 //Sensor init
 pros::Vision vSensor(8, pros::E_VISION_ZERO_CENTER);
-pros::ADIDigitalIn topLimit(8);
+pros::ADILineSensor topLimit('A');
 
 //bool that holds the state of the limiter
 extern bool canLimit;
@@ -19,18 +20,20 @@ extern bool canLimit;
 #define BLUE
 
 //tuning variables
-static int32_t delayEject = 500;
+static int32_t delayEject = 250;
 static int32_t bottomSpeed = 127;
+static const int32_t lowSpeed = 80;
 
 int32_t topVelocity = 375;
 static int32_t minVelocity = 350;
 
-
+const int32_t normalLineValue = 2800
+;
 //enable/disable sorting task
 bool SORT_SYS_ENABLE = true;
 
 unsigned int limitPresses = 0;
-
+/*
 //polls limit switch to check for when a ball passes through.
 void pollSensors()
 {
@@ -45,7 +48,7 @@ void pollSensors()
 		pros::delay(10);
 	}
 }
-
+*/
 bool disableTop = false;
 bool disableBottom = false;
 extern bool runningAuton;
@@ -72,6 +75,18 @@ void sort(void* sigPass)
 	
 	while(true)
 	{
+		if(!controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
+		{
+			bottomSpeed = lowSpeed;
+			topSystem.move(0);
+			canLimit = true;
+		}
+		else
+		{
+			bottomSpeed = 127;
+			canLimit = false;
+		}
+		
         //if the sorting system is disabled then don't attemp to sort.
         if(!SORT_SYS_ENABLE)
             continue;
@@ -86,7 +101,7 @@ void sort(void* sigPass)
 			static bool runSwitch = false;
 
 			//if the top limiter sensor is hit and the program is allowed to limit, stop loading more.
-			if(topLimit.get_value() && canLimit && !runSwitch)
+			if(topLimit.get_value() < normalLineValue && canLimit && !runSwitch)
 			{
 				topSystem.move_velocity(0);
 				
@@ -98,24 +113,26 @@ void sort(void* sigPass)
 				continue;
 			}
 
-			if(topLimit.get_value() && canLimit && runSwitch)
+			if(topLimit.get_value() < normalLineValue && canLimit && runSwitch)
 			{
 				bottomSystem.move_velocity(0);
 				continue;
 			}
 
-			if(!topLimit.get_value() && canLimit && runSwitch)
+			if(!topLimit.get_value() < normalLineValue && canLimit && runSwitch)
 			{
 				runSwitch = false;
 			}
 		}
 		else
 		{
-			if(topLimit.get_value() && canLimit)
+			pros::lcd::print(1, "%f", topLimit.get_value() < normalLineValue);
+
+			if(topLimit.get_value() < normalLineValue && canLimit && !controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
 			{
 				bottomSystem.move_velocity(0);
 				//topSystem.move_velocity(0);
-				
+				pros::lcd::print(0, "%s", "stoppping");
 				continue;
 			}
 		}
@@ -128,7 +145,7 @@ void sort(void* sigPass)
 			if(First_rtn.y_middle_coord > Second_rtn.y_middle_coord)
 			{
 				vSensor.set_led(COLOR_GREEN);
-				if(!disableTop)
+				if(!disableTop && controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
 					topSystem.move_velocity(-topVelocity);
 				if(!disableBottom)
 					bottomSystem.move(bottomSpeed);
@@ -136,8 +153,15 @@ void sort(void* sigPass)
 			else
 			{
 				vSensor.set_led(COLOR_GREEN);
-				if(!disableTop)
+				if(!disableTop && controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
+				{
 					topSystem.move_velocity(topVelocity);
+				}
+				else if(!disableTop && !controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
+				{
+					topSystem.move(0);
+				}
+				
 				if(!disableBottom)
 					bottomSystem.move(bottomSpeed);
 			}
@@ -151,23 +175,34 @@ void sort(void* sigPass)
 			#else
 			vSensor.set_led(COLOR_RED);
 			#endif
-			if(topSystem.get_actual_velocity() > minVelocity)
+					
+			if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
 			{
-				if(!disableTop)
-					topSystem.move_velocity(topVelocity);
-				if(!disableBottom)
-					bottomSystem.move(bottomSpeed);
-			}
-			else
+				if(topSystem.get_actual_velocity() > minVelocity)
+				{
+					if(!disableBottom)
+						bottomSystem.move(bottomSpeed);
+					if(!disableTop && controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
+					{
+						topSystem.move_velocity(topVelocity);
+					}
+					else if(!disableTop && !controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
+					{
+						topSystem.move(0);
+					}
+				}
+				else
 			{
-				if(!disableTop)
+				if(!disableTop && controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
 					topSystem.move_velocity(topVelocity);
 				bottomSystem.move_velocity(0);
 			}
+			}
+			
 		}
 		//if the alliance ball is not detected then search for the enemy ball for discarding.
 		else
-		if(Second_rtn.signature != 255 && Second_rtn.width > 40)
+		if(Second_rtn.signature != 255 && Second_rtn.width > 70)
 		{
 			#ifdef BLUE
 			vSensor.set_led(COLOR_RED);
@@ -185,11 +220,13 @@ void sort(void* sigPass)
 		{
 			vSensor.set_led(COLOR_LIGHT_CORAL);
 
-			if(!disableTop)
+			if(!disableTop && controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
 				topSystem.move_velocity(topVelocity);
 			if(!disableBottom)
 				bottomSystem.move(bottomSpeed);
 		}
+		if(!controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
+			topSystem.move(0);
 		//make the thread sleep to prevent other threads from being starved of resources.
 		pros::Task::delay(10);
 	}

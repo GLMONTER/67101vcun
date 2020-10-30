@@ -1,3 +1,4 @@
+
 #include"main.h"
 //for trig functions
 #include<cmath>
@@ -8,7 +9,7 @@
 #define M_TRACKING_DISTANCE 7.5
 
 pros::ADIEncoder leftEncoder(3, 4, false);
-pros::ADIEncoder rightEncoder(1, 2, false);
+pros::ADIEncoder rightEncoder(7, 2, false);
 pros::ADIEncoder middleEncoder(5, 6, false);
 /*
 void writeEncoder()

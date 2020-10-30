@@ -7,8 +7,8 @@ void initialize()
     imu.reset();
     pros::delay(2000);
 	pros::lcd::initialize();
-	/*
-	pros::Task pollTask(pollSensors, "poll");
+	
+	//pros::Task pollTask(pollSensors, "poll");
 	#define RED
 	
 	#ifdef BLUE
@@ -18,7 +18,7 @@ void initialize()
 	#ifdef RED
 	pros::Task sortTask(sort, reinterpret_cast<void*>(&RED_SIG), "vision");
 	#endif
-	*/
+	
 }
 
 void disabled()
@@ -51,8 +51,10 @@ bool canLimit = false;
 
 static bool topToggle = false;
 static bool topPressed;
+/*
 extern void trackPosition();
 extern void moveToPoint(const float x, const float y, const float angle);
+*/
 void opcontrol() 
 {
 	/*
@@ -65,7 +67,7 @@ void opcontrol()
 	lv_obj_set_pos(im,  0, -75);
 	lv_obj_set_drag(im, false);
 */	
-	moveToPoint(12, 12, 0);
+	//moveToPoint(12, 12, 0);
 
 	//trackPosition();
 
@@ -107,7 +109,7 @@ void opcontrol()
 		rightFront.move(ch3 - ch1 - ch4);
 		leftBack.move(ch3 + ch1 - ch4);
 		rightBack.move(ch3 - ch1 + ch4);
-		
+		/*
 
 		//a load toggle to allow shooting.
 		if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT))
@@ -130,7 +132,7 @@ void opcontrol()
 		{
 			canLimit = false;
 		}
-
+*/
 		//a failsafe for the sorting system
 		if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_X))
 		{
