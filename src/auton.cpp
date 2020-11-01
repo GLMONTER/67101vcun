@@ -1,15 +1,19 @@
 #include"main.h"
 
 pros::Imu imu(18);
-/*
-extern pros::ADIDigitalIn topLimit;
+
+extern pros::ADILineSensor topLimit;
 
 extern bool SORT_SYS_ENABLE;
+
 extern bool canLimit;
 extern unsigned int limitPresses;
 extern bool disableTop;
 extern bool disableBottom;
+
 extern int32_t topVelocity;
+const extern int32_t normalLineValue;
+const extern int32_t lowLineValue;
 
 enum loaderSetting
 {
@@ -19,17 +23,16 @@ enum loaderSetting
 };
 static void init()
 {
-    //release hood by spinning Trio.
+    //release hood by spinning Trio and reverse loaders.
 	topSystem.move(127);
 	bottomSystem.move(127);
 	setLoaders(1);
 	pros::Task::delay(700);
 	topSystem.move(0);
-	//reverse loaders for deplyoment
 }
-*/
+
 bool runningAuton = false;
-/*
+
 //wait until a certain number of balls have gone through
 static void waitUntilPressCount(const unsigned int pressCount, const bool waitUntilHold)
 {
@@ -40,12 +43,12 @@ static void waitUntilPressCount(const unsigned int pressCount, const bool waitUn
     std::cout<<limitPresses<<std::endl;
     canLimit = false;
     
-    while(limitPresses < pressCount)
+    while(limitPresses < pressCount - 1)
     {
         std::cout<< " Limit : " <<limitPresses<<std::endl;
         std::cout<< " PRESS : " <<pressCount<<std::endl;
         pros::delay(100);
-        //std::cout<<limitPresses<<std::endl;
+       
         canLimit = false;
         if(!printed)
         {
@@ -55,16 +58,10 @@ static void waitUntilPressCount(const unsigned int pressCount, const bool waitUn
     }
     if(waitUntilHold)
     {
-        std::cout<<"starting wait until hold"<<std::endl;
-        while(topLimit.get_value())
+        while(topLimit.get_value() > lowLineValue)
         {
-            continue;
+            pros::delay(10);
         }
-        while(!topLimit.get_value())
-        {
-            continue;
-        }
-        std::cout<<"finished"<<std::endl;
     }
     canLimit = true;
 }
@@ -120,7 +117,7 @@ static auto chassis = ChassisControllerBuilder()
         1, // Bottom right (reversed)
         9   // Bottom left
     )
-    /*
+    
     .withGains(
         {0.0025, 0.0005, 0.0001}, // Distance controller gains
         {0.0025, 0.0005, 0.0001}, // Turn controller gains
@@ -237,15 +234,15 @@ static void newHomeRow()
     pros::delay(1500);
     chassis->moveDistance(-2_ft);
 }
-*/
+
 //actually running the auton
 void runAuton()
 {
-    /*
+    
     init();
     runningAuton = true;
     waitUntilPressCount(2, true);
     strafeAbstract(xModel, -150, 1000, 0);
     runningAuton = false;
-    */
+    
 }

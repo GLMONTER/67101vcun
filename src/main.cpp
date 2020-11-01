@@ -33,6 +33,7 @@ void competition_initialize()
 }
 
 extern void runAuton();
+
 void autonomous()
 {
 	runAuton();
@@ -55,8 +56,19 @@ static bool topPressed;
 extern void trackPosition();
 extern void moveToPoint(const float x, const float y, const float angle);
 */
+void checkLiftStatus()
+{
+	std::string topTemp = "TOP:" + std::to_string((int)topSystem.get_temperature()) 
+			+ " BOT:" + std::to_string((int)bottomSystem.get_temperature());
+
+	controller.print(0, 0, "%s" , topTemp.c_str());
+	pros::delay(100);
+}
+
 void opcontrol() 
 {
+	pros::Task sortTask(checkLiftStatus, "liftStatus");
+
 	/*
 	LV_IMG_DECLARE(vaquita);
 
@@ -71,35 +83,9 @@ void opcontrol()
 
 	//trackPosition();
 
-
-
 	while (true) 
 	{
-		static int i = 0;
-		if(i == 100)
-		{
-			std::string faultStatus;
-			if(leftBack.get_faults() == pros::motor_fault_e_t::E_MOTOR_FAULT_NO_FAULTS && 
-			leftFront.get_faults() == pros::motor_fault_e_t::E_MOTOR_FAULT_NO_FAULTS && 
-			rightBack.get_faults() == pros::motor_fault_e_t::E_MOTOR_FAULT_NO_FAULTS && 
-			rightFront.get_faults() == pros::motor_fault_e_t::E_MOTOR_FAULT_NO_FAULTS)
-			{
-				faultStatus = "OK";
-			}
-			else
-			{
-				faultStatus == "FAULT!";
-			}
-			
-			std::string topTemp = "TOP:" + std::to_string((int)topSystem.get_temperature()) 
-			+ " BOT:" + std::to_string((int)bottomSystem.get_temperature()) + " DRV STAT:" + faultStatus.c_str();
-	
-
-			controller.print(0, 0, "%s" , topTemp.c_str());
-
-			i = 0;
-		}
-		i++;
+		
 		int32_t ch1 = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
 		int32_t ch2 = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y);
 		int32_t ch3 = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
@@ -109,30 +95,7 @@ void opcontrol()
 		rightFront.move(ch3 - ch1 - ch4);
 		leftBack.move(ch3 + ch1 - ch4);
 		rightBack.move(ch3 - ch1 + ch4);
-		/*
-
-		//a load toggle to allow shooting.
-		if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT))
-		{
-			if(!topPressed)
-			{
-				topToggle = 1 - topToggle;
-
-				topPressed = 1;
-			}
-		}
-		else
-			topPressed = 0;
-
-		if(topToggle)
-		{
-			canLimit = true;
-		}
-		else
-		{
-			canLimit = false;
-		}
-*/
+	
 		//a failsafe for the sorting system
 		if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_X))
 		{
@@ -156,9 +119,7 @@ void opcontrol()
 			sortFailsafe();
 		}
 
-		
-
-		//LOADING SYSTEM.
+		//LOADER SYSTEM.
 		if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1))
 		{
 			rightLoader.move(127);

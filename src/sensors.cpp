@@ -27,28 +27,33 @@ static const int32_t lowSpeed = 80;
 int32_t topVelocity = 375;
 static int32_t minVelocity = 350;
 
-const int32_t normalLineValue = 2800
-;
+int32_t normalLineValue = 2800;
+int32_t lowLineValue = 2600;
+
 //enable/disable sorting task
 bool SORT_SYS_ENABLE = true;
 
 unsigned int limitPresses = 0;
-/*
-//polls limit switch to check for when a ball passes through.
+
+//polls line sensor to check for when a ball passes through.
 void pollSensors()
 {
 	while(true)
 	{
-		if(topLimit.get_new_press())
+		while(topLimit.get_value() > lowLineValue)
 		{
-			limitPresses++;
-			std::cout<<limitPresses<<std::endl;
-			std::cout<<"new press!"<<std::endl;
+			pros::delay(10);
 		}
+		pros::delay(100);
+		while(topLimit.get_value() < normalLineValue)
+		{
+			pros::delay(10);
+		}
+		limitPresses++;
 		pros::delay(10);
 	}
 }
-*/
+
 bool disableTop = false;
 bool disableBottom = false;
 extern bool runningAuton;
