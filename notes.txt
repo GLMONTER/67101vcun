@@ -1,1 +1,4 @@
-blue
+Check if counting with line sensor works
+6 tower auton
+Change red and blue defines to one define making switching easier
+

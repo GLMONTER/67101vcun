@@ -8,7 +8,7 @@ void initialize()
     pros::delay(2000);
 	pros::lcd::initialize();
 	
-	//pros::Task pollTask(pollSensors, "poll");
+	pros::Task pollTask(pollSensors, "poll");
 	#define RED
 	
 	#ifdef BLUE

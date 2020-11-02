@@ -240,6 +240,7 @@ void runAuton()
 {
     
     init();
+    setLoaders(0);
     runningAuton = true;
     waitUntilPressCount(2, true);
     strafeAbstract(xModel, -150, 1000, 0);

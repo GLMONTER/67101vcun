@@ -5,7 +5,7 @@
 #define ENEMEY_SIG 2
 
 //signatures generated using the vision utility	
-pros::vision_signature_s_t BLUE_SIG = pros::Vision::signature_from_utility(2, -2017, -533, -1276, 2419, 4497, 3458, 1.000, 0);
+pros::vision_signature_s_t BLUE_SIG = pros::Vision::signature_from_utility(1, -2017, -533, -1276, 2419, 4497, 3458, 1.000, 0);
 pros::vision_signature_s_t RED_SIG = pros::Vision::signature_from_utility(2, 7969, 10049, 9010, -447, 815, 184, 2.500, 0);
 
 
@@ -50,6 +50,7 @@ void pollSensors()
 			pros::delay(10);
 		}
 		limitPresses++;
+		pros::lcd::print(5, "%d", limitPresses);
 		pros::delay(10);
 	}
 }
@@ -80,16 +81,19 @@ void sort(void* sigPass)
 	
 	while(true)
 	{
-		if(!controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
+		if(!runningAuton)
 		{
-			bottomSpeed = lowSpeed;
-			topSystem.move(0);
-			canLimit = true;
-		}
-		else
-		{
-			bottomSpeed = 127;
-			canLimit = false;
+			if(!controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
+			{
+				bottomSpeed = lowSpeed;
+				topSystem.move(0);
+				canLimit = true;
+			}
+			else
+			{
+				bottomSpeed = 127;
+				canLimit = false;
+			}
 		}
 		
         //if the sorting system is disabled then don't attemp to sort.
@@ -120,11 +124,12 @@ void sort(void* sigPass)
 
 			if(topLimit.get_value() < normalLineValue && canLimit && runSwitch)
 			{
+				std::cout<<"waitinggg"<<std::endl;
 				bottomSystem.move_velocity(0);
 				continue;
 			}
 
-			if(!topLimit.get_value() < normalLineValue && canLimit && runSwitch)
+			if(!(topLimit.get_value() < normalLineValue) && canLimit && runSwitch)
 			{
 				runSwitch = false;
 			}
@@ -137,7 +142,7 @@ void sort(void* sigPass)
 			{
 				bottomSystem.move_velocity(0);
 				//topSystem.move_velocity(0);
-				pros::lcd::print(0, "%s", "stoppping");
+				std::cout<<"stoppping"<<std::endl;
 				continue;
 			}
 		}
@@ -147,10 +152,11 @@ void sort(void* sigPass)
 		//if both sigs are found then sort based on color and positioning
 		if(Second_rtn.signature != 255 && First_rtn.signature != 255 && First_rtn.width > 15 && Second_rtn.width > 15)
 		{
+			std::cout<<"both";
 			if(First_rtn.y_middle_coord > Second_rtn.y_middle_coord)
 			{
 				vSensor.set_led(COLOR_GREEN);
-				if(!disableTop && controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
+				if(!disableTop && (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2) || runningAuton))
 					topSystem.move_velocity(-topVelocity);
 				if(!disableBottom)
 					bottomSystem.move(bottomSpeed);
@@ -158,7 +164,7 @@ void sort(void* sigPass)
 			else
 			{
 				vSensor.set_led(COLOR_GREEN);
-				if(!disableTop && controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
+				if(!disableTop && (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2) || runningAuton))
 				{
 					topSystem.move_velocity(topVelocity);
 				}
@@ -175,33 +181,34 @@ void sort(void* sigPass)
 		else
 		if(First_rtn.signature != 255 && First_rtn.width > 40)
 		{
-			#ifdef BLUE
+			std::cout<<"alliance";
+			#ifdef RED
 			vSensor.set_led(COLOR_BLUE);
 			#else
 			vSensor.set_led(COLOR_RED);
 			#endif
 					
-			if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
+			if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2) || runningAuton)
 			{
+				if(runningAuton)
+				{
+					topSystem.move_velocity(topVelocity);
+				}
 				if(topSystem.get_actual_velocity() > minVelocity)
 				{
 					if(!disableBottom)
 						bottomSystem.move(bottomSpeed);
-					if(!disableTop && controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
+					if(!disableTop)
 					{
 						topSystem.move_velocity(topVelocity);
 					}
-					else if(!disableTop && !controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
-					{
-						topSystem.move(0);
-					}
 				}
 				else
-			{
-				if(!disableTop && controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
-					topSystem.move_velocity(topVelocity);
-				bottomSystem.move_velocity(0);
-			}
+				{
+					if(!disableTop && controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
+						topSystem.move_velocity(topVelocity);
+					//bottomSystem.move_velocity(0);
+				}
 			}
 			
 		}
@@ -209,7 +216,8 @@ void sort(void* sigPass)
 		else
 		if(Second_rtn.signature != 255 && Second_rtn.width > 70)
 		{
-			#ifdef BLUE
+			std::cout<<"enemy";
+			#ifdef RED
 			vSensor.set_led(COLOR_RED);
 			#else
 			vSensor.set_led(COLOR_BLUE);
@@ -223,14 +231,15 @@ void sort(void* sigPass)
 		//if nothing was found then just load like normal
 		else
 		{
+			std::cout<<"nothing";
 			vSensor.set_led(COLOR_LIGHT_CORAL);
 
-			if(!disableTop && controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
+			if(!disableTop && (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2) || runningAuton))
 				topSystem.move_velocity(topVelocity);
-			if(!disableBottom)
+			if(!disableBottom && topLimit.get_value() > lowLineValue && !canLimit)
 				bottomSystem.move(bottomSpeed);
 		}
-		if(!controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
+		if(!controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2) && !runningAuton)
 			topSystem.move(0);
 		//make the thread sleep to prevent other threads from being starved of resources.
 		pros::Task::delay(10);
