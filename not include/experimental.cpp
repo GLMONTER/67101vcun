@@ -5,11 +5,16 @@
 
 #define WHEEL_DIAM 2.783
 #define SPIN_TO (WHEEL_DIAM * PI / 360)
-#define L_R_TRACKING_DISTANCE 7.5
-#define M_TRACKING_DISTANCE 7.5
+#define L_R_TRACKING_DISTANCE 5.0
+#define M_TRACKING_DISTANCE 7.0
 
+<<<<<<< HEAD:not include/experimental.cpp
 pros::ADIEncoder leftEncoder(3, 4, false);
 pros::ADIEncoder rightEncoder(7, 2, false);
+=======
+pros::ADIEncoder leftEncoder(3, 4, true);
+pros::ADIEncoder rightEncoder(1, 2, true);
+>>>>>>> parent of 951d818... push all changes:src/experimental.cpp
 pros::ADIEncoder middleEncoder(5, 6, false);
 /*
 void writeEncoder()
@@ -97,10 +102,6 @@ void trackPosition()
     globalPos.a = fullAngleTraveled;
     pros::lcd::print(0, "x :  %f\n", globalPos.x);
     pros::lcd::print(1, "y :  %f\n", globalPos.y);
-
-    pros::lcd::print(2, "left :  %d\n", leftEncoder.get_value());
-    pros::lcd::print(3, "right :  %d\n", rightEncoder.get_value());
-    pros::lcd::print(4, "middle :  %d\n", middleEncoder.get_value());
     
 
 
@@ -115,9 +116,9 @@ float getNewX(const float target)
     static float previousError;
     static float driveValue;
 
-    const float Ki = 0.0015f;
-    const float Kd = 0.6f;
-    const float Kp = 6.5f;
+    const float Ki = -0.0015f;
+    const float Kd = -0.6f;
+    const float Kp = -6.5f;
 
     error = target - globalPos.x;
     integral = integral + error;
@@ -139,9 +140,9 @@ float getNewY(const float target)
     static float previousError;
     static float driveValue;
 
-    const float Ki = 0.0015f;
-    const float Kd = 0.6f;
-    const float Kp = 6.5f;
+    const float Ki = -0.0015f;
+    const float Kd = -0.6f;
+    const float Kp = -6.5f;
 
     error = target - globalPos.x;
     integral = integral + error;
@@ -181,27 +182,21 @@ float getNewAngle(const float target)
 //calculating error between requested position and current position using pid and running the drive train
 void moveToPoint(const float x, const float y, const float angle)
 {
-    /*
     while(leftFront.get_actual_velocity() > 3 && leftBack.get_actual_velocity() > 3 
     && rightFront.get_actual_velocity() > 3 && rightBack.get_actual_velocity() > 3 && 
-    (std::abs(globalPos.x - x) > 0.25) && (std::abs(globalPos.y - y) > 0.25) 
-    && std::abs(globalPos.a - angle) > 5)
-    */
-   while((std::abs(globalPos.x - x) > 0.25) && (std::abs(globalPos.y - y) > 0.25) )
+    (std::abs(globalPos.x - x) < 0.25) && (std::abs(globalPos.y - y) < 0.25) 
+    && std::abs(globalPos.a - angle))
     {
-        trackPosition();
-        
         float tempY = getNewY(y);
         float tempX = getNewX(x);
-        float tempAngle = 0;//getNewAngle(angle);
+        float tempAngle = getNewAngle(angle);
 
         int32_t frontLeftV = tempY + tempX - tempAngle;
         int32_t frontRightV = tempY - tempX + tempAngle;
-        std::cout<<"y : "<<tempY<<" x : "<<tempX<<std::endl;
         int32_t backLeftV = tempY - tempX - tempAngle;
         int32_t backRightV = tempY + tempX + tempAngle;
         setDriveSpec(frontLeftV, frontRightV, backLeftV, backRightV);
 
-        pros::delay(10);
+        pros::delay(5);
     }
 }

@@ -7,7 +7,11 @@ void initialize()
     imu.reset();
     pros::delay(2000);
 	pros::lcd::initialize();
+<<<<<<< HEAD
 	
+=======
+
+>>>>>>> parent of 951d818... push all changes
 	pros::Task pollTask(pollSensors, "poll");
 	#define RED
 	
@@ -18,7 +22,10 @@ void initialize()
 	#ifdef RED
 	pros::Task sortTask(sort, reinterpret_cast<void*>(&RED_SIG), "vision");
 	#endif
+<<<<<<< HEAD
 	
+=======
+>>>>>>> parent of 951d818... push all changes
 }
 
 void disabled()
@@ -54,6 +61,7 @@ static bool topToggle = false;
 static bool topPressed;
 /*
 extern void trackPosition();
+<<<<<<< HEAD
 extern void moveToPoint(const float x, const float y, const float angle);
 */
 void checkLiftStatus()
@@ -64,6 +72,8 @@ void checkLiftStatus()
 	controller.print(0, 0, "%s" , topTemp.c_str());
 	pros::delay(100);
 }
+=======
+>>>>>>> parent of 951d818... push all changes
 
 void opcontrol() 
 {
@@ -79,10 +89,19 @@ void opcontrol()
 	lv_obj_set_pos(im,  0, -75);
 	lv_obj_set_drag(im, false);
 */	
+<<<<<<< HEAD
 	//moveToPoint(12, 12, 0);
 
 	//trackPosition();
 
+=======
+/*
+while(true)
+{
+	trackPosition();
+}
+*/
+>>>>>>> parent of 951d818... push all changes
 	while (true) 
 	{
 		

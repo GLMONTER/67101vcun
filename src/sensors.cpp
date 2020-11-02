@@ -5,9 +5,8 @@
 #define ENEMEY_SIG 2
 
 //signatures generated using the vision utility	
-pros::vision_signature_s_t BLUE_SIG = pros::Vision::signature_from_utility(1, -2017, -533, -1276, 2419, 4497, 3458, 1.000, 0);
-pros::vision_signature_s_t RED_SIG = pros::Vision::signature_from_utility(2, 7969, 10049, 9010, -447, 815, 184, 2.500, 0);
-
+pros::vision_signature_s_t BLUE_SIG = pros::Vision::signature_from_utility(1, -3495, -2369, -2932, 9043, 15777, 12410, 2.000, 0);
+pros::vision_signature_s_t RED_SIG = pros::Vision::signature_from_utility(2, 5439, 7267, 6352, -1, 811, 404, 2.500, 0);
 
 //Sensor init
 pros::Vision vSensor(8, pros::E_VISION_ZERO_CENTER);
@@ -27,8 +26,8 @@ static const int32_t lowSpeed = 80;
 int32_t topVelocity = 375;
 static int32_t minVelocity = 350;
 
-int32_t normalLineValue = 2800;
-int32_t lowLineValue = 2600;
+int32_t normalLineValue = 2900;
+int32_t lowLineValue = 2800;
 
 //enable/disable sorting task
 bool SORT_SYS_ENABLE = true;
@@ -94,6 +93,14 @@ void sort(void* sigPass)
 				bottomSpeed = 127;
 				canLimit = false;
 			}
+			if(topLimit.get_value() > lowLineValue)
+			{
+				bottomSystem.move(bottomSpeed);
+			}
+			if(topLimit.get_value() < lowLineValue && canLimit)
+			{
+				bottomSystem.move_velocity(0);
+			}
 		}
 		
         //if the sorting system is disabled then don't attemp to sort.
@@ -136,15 +143,13 @@ void sort(void* sigPass)
 		}
 		else
 		{
-			pros::lcd::print(1, "%f", topLimit.get_value() < normalLineValue);
-
 			if(topLimit.get_value() < normalLineValue && canLimit && !controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
 			{
 				bottomSystem.move_velocity(0);
 				//topSystem.move_velocity(0);
-				std::cout<<"stoppping"<<std::endl;
+				//std::cout<<"stoppping"<<std::endl;
 				continue;
-			}
+			}			
 		}
 		
         /*255 returns if no objects of stated signature is found.*/
@@ -158,8 +163,11 @@ void sort(void* sigPass)
 				vSensor.set_led(COLOR_GREEN);
 				if(!disableTop && (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2) || runningAuton))
 					topSystem.move_velocity(-topVelocity);
-				if(!disableBottom)
+				if(!disableBottom && topSystem.get_actual_velocity() > minVelocity && topSystem.get_direction() == 1 && canLimit == false)
+				{
+					std::cout<<"moving"<<std::endl;
 					bottomSystem.move(bottomSpeed);
+				}
 			}
 			else
 			{
@@ -173,10 +181,11 @@ void sort(void* sigPass)
 					topSystem.move(0);
 				}
 				
-				if(!disableBottom)
+				if(!disableBottom && topSystem.get_actual_velocity() > minVelocity && topSystem.get_direction() == 1 && canLimit == false)
 					bottomSystem.move(bottomSpeed);
 			}
 		}
+		
 		//if the alliance color ball was found the just load up
 		else
 		if(First_rtn.signature != 255 && First_rtn.width > 40)
@@ -194,7 +203,7 @@ void sort(void* sigPass)
 				{
 					topSystem.move_velocity(topVelocity);
 				}
-				if(topSystem.get_actual_velocity() > minVelocity)
+				if(topSystem.get_actual_velocity() > minVelocity && topSystem.get_direction() == 1)
 				{
 					if(!disableBottom)
 						bottomSystem.move(bottomSpeed);
@@ -210,11 +219,10 @@ void sort(void* sigPass)
 					//bottomSystem.move_velocity(0);
 				}
 			}
-			
 		}
 		//if the alliance ball is not detected then search for the enemy ball for discarding.
 		else
-		if(Second_rtn.signature != 255 && Second_rtn.width > 70)
+		if(Second_rtn.signature != 255 && Second_rtn.width > 40)
 		{
 			std::cout<<"enemy";
 			#ifdef RED
@@ -231,13 +239,16 @@ void sort(void* sigPass)
 		//if nothing was found then just load like normal
 		else
 		{
-			std::cout<<"nothing";
+			std::cout<<"nothing "<<canLimit<<std::endl;
 			vSensor.set_led(COLOR_LIGHT_CORAL);
 
 			if(!disableTop && (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2) || runningAuton))
 				topSystem.move_velocity(topVelocity);
-			if(!disableBottom && topLimit.get_value() > lowLineValue && !canLimit)
+			if(!disableBottom && !canLimit)
+			{
+				std::cout<<"m"<<std::endl;
 				bottomSystem.move(bottomSpeed);
+			}
 		}
 		if(!controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2) && !runningAuton)
 			topSystem.move(0);
