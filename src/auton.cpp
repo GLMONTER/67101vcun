@@ -1,19 +1,15 @@
 #include"main.h"
 
 pros::Imu imu(18);
-
-extern pros::ADILineSensor topLimit;
+extern pros::Distance distance_sensor;
+extern pros::ADIDigitalIn topLimit;
 
 extern bool SORT_SYS_ENABLE;
-
 extern bool canLimit;
 extern unsigned int limitPresses;
 extern bool disableTop;
 extern bool disableBottom;
-
 extern int32_t topVelocity;
-const extern int32_t normalLineValue;
-const extern int32_t lowLineValue;
 
 enum loaderSetting
 {
@@ -23,12 +19,13 @@ enum loaderSetting
 };
 static void init()
 {
-    //release hood by spinning Trio and reverse loaders.
+    //release hood by spinning Trio.
 	topSystem.move(127);
 	bottomSystem.move(127);
 	setLoaders(1);
 	pros::Task::delay(700);
 	topSystem.move(0);
+	//reverse loaders for deplyoment
 }
 
 bool runningAuton = false;
@@ -43,12 +40,12 @@ static void waitUntilPressCount(const unsigned int pressCount, const bool waitUn
     std::cout<<limitPresses<<std::endl;
     canLimit = false;
     
-    while(limitPresses < pressCount - 1)
+    while(limitPresses < pressCount)
     {
         std::cout<< " Limit : " <<limitPresses<<std::endl;
         std::cout<< " PRESS : " <<pressCount<<std::endl;
         pros::delay(100);
-       
+        //std::cout<<limitPresses<<std::endl;
         canLimit = false;
         if(!printed)
         {
@@ -58,10 +55,13 @@ static void waitUntilPressCount(const unsigned int pressCount, const bool waitUn
     }
     if(waitUntilHold)
     {
-        while(topLimit.get_value() > lowLineValue)
+        pros::delay(250);
+        std::cout<<"starting wait until hold"<<std::endl;
+        while(distance_sensor.get() > 50)
         {
-            pros::delay(10);
+            continue;
         }
+        std::cout<<"finished"<<std::endl;
     }
     canLimit = true;
 }
@@ -83,7 +83,7 @@ static void gyroTurn(const float deg)
     float target = deg;
     float Ki = -0.0015;
     float Kd = -0.6;
-    float Kp = -6.5;
+    float Kp = -5.5;
 
     while (abs(error) > 1 || leftBack.get_actual_velocity() > 0.1)
     {
@@ -98,10 +98,8 @@ static void gyroTurn(const float deg)
         derivative = error - perror;
         perror = error;
         value = (integral*Ki) + (derivative*Kd) + (error*Kp);
-        if(value > 0)
-            setDrive(-value, value);
-        else
-            setDrive(value, -value);
+        
+        setDrive(-value, value);
         
         pros::delay(5);
     }
@@ -119,9 +117,9 @@ static auto chassis = ChassisControllerBuilder()
     )
     
     .withGains(
-        {0.0025, 0.0005, 0.0001}, // Distance controller gains
+        {0.002, 0.0005, 0.0001}, // Distance controller gains
         {0.0025, 0.0005, 0.0001}, // Turn controller gains
-        {0.0025, 0.0005, 0.0001})  // Angle controller gains (helps drive straight)
+        {0.0012, 0.0005, 0.0001})  // Angle controller gains (helps drive straight)
         
 
     .withDimensions(AbstractMotor::gearset::green, {{4_in, 11.5_in}, imev5GreenTPR})
@@ -164,22 +162,38 @@ static void swingTurn(const int32_t forwardPower, const int32_t turnPower, const
         pros::delay(driveSettle);
 }
 
-static void twoRight()
+static void threeRight()
 {
+    topSystem.move_velocity(topVelocity);
     //set initial chassis velocity
     chassis->setMaxVelocity(130);
     
     //start lifts and sorting
     SORT_SYS_ENABLE = true;
-    canLimit = false;
+    
     setLoaders(loaderSetting::Forward);
 
     //swing into tower and load
-    swingTurn(80, 20, 1650, 600, true);
-    pros::Task::delay(700);
+   //swingTurn(80, 21, 1670, 0, true);
+   chassis->moveDistance(1.8_ft);
+   gyroTurn(66);
+   chassis->setMaxVelocity(110);
+   chassis->moveDistance(1.8_ft);
+    waitUntilPressCount(1, true);
+
      
     //move out 
-    chassis->moveDistance(-1.5_ft);
+    chassis->moveDistance(-0.8_ft);
+    setLoaders(2);
+    gyroTurn(-40);
+    chassis->setMaxVelocity(100);
+    setLoaders(0);
+    chassis->moveDistance(2_ft);
+    gyroTurn(-35);
+    chassis->moveDistance(0.75_ft);
+    waitUntilPressCount(3, false);
+    chassis->moveDistance(-1_ft);
+
 }
 static void twoLeft()
 {
@@ -238,12 +252,9 @@ static void newHomeRow()
 //actually running the auton
 void runAuton()
 {
-    
     init();
-    setLoaders(0);
     runningAuton = true;
-    waitUntilPressCount(2, true);
-    strafeAbstract(xModel, -150, 1000, 0);
-    runningAuton = false;
+    threeRight();
     
+    runningAuton = false;
 }

@@ -1,4 +1,3 @@
-Check if counting with line sensor works
-6 tower auton
-Change red and blue defines to one define making switching easier
-
+do 3 tower for calvin
+both 2 pointers
+homerow
