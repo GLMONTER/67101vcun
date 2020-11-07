@@ -38,11 +38,11 @@ void pollSensors()
 {
 	while(true)
 	{
-		while(distance_sensor.get() > 50)
+		while(distance_sensor.get() > 15)
 		{
 			continue;
 		}
-		while(distance_sensor.get() < 75)
+		while(distance_sensor.get() < 25)
 		{
 			continue;
 		}
@@ -110,52 +110,23 @@ void sort(void* sigPass)
 		{
 			canLimit = false;
 		}
-		/*
-		if(runningAuton)
-		{
-			//std::cout<<"auton"<<std::endl;
-			static bool runSwitch = false;
-
-			//if the top limiter sensor is hit and the program is allowed to limit, stop loading more.
-			if(seeBall() && canLimit && !runSwitch)
-			{
-				topSystem.move_velocity(0);
-				
-				bottomSystem.move_velocity(0);
-				if(!disableTop)
-					topSystem.move_velocity(topVelocity);
-				runSwitch = true;
-				std::cout<<"LIMIT"<<std::endl;
-				continue;
-			}
-
-			if(seeBall() && canLimit && runSwitch)
-			{
-				bottomSystem.move_velocity(0);
-				continue;
-			}
-
-			if(!seeBall() && canLimit && runSwitch)
-			{
-				runSwitch = false;
-			}
-			
-		}
-		*/
-		/*
-		else
-		{
-			
-		}
-		*/
+		
 		if(seeBall() && canLimit)
 		{
-				std::cout<<"stopping"<<std::endl;
+				static int i = 0;
+				i++;
+				if(i == 1000)
+				{
+					std::cout<<"stopping"<<std::endl;
+					i = 0;
+				}
 				bottomSystem.move_velocity(0);
-				//topSystem.move_velocity(0);
+				if(runningAuton)
+					topSystem.move_velocity(0);
 				
 				continue;
 		}
+
         /*255 returns if no objects of stated signature is found.*/
 
 		//if both sigs are found then sort based on color and positioning

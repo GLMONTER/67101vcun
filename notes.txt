@@ -1,3 +1,4 @@
-do 3 tower for calvin
 both 2 pointers
+do 3 tower for calvin, PUSH AGAINST WALL
+
 homerow

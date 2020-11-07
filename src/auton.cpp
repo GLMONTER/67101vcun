@@ -19,12 +19,14 @@ enum loaderSetting
 };
 static void init()
 {
+   
     //release hood by spinning Trio.
 	topSystem.move(127);
 	bottomSystem.move(127);
 	setLoaders(1);
 	pros::Task::delay(700);
 	topSystem.move(0);
+   
 	//reverse loaders for deplyoment
 }
 
@@ -42,6 +44,7 @@ static void waitUntilPressCount(const unsigned int pressCount, const bool waitUn
     
     while(limitPresses < pressCount)
     {
+        pros::lcd::print(3, "%d", limitPresses);
         std::cout<< " Limit : " <<limitPresses<<std::endl;
         std::cout<< " PRESS : " <<pressCount<<std::endl;
         pros::delay(100);
@@ -83,7 +86,7 @@ static void gyroTurn(const float deg)
     float target = deg;
     float Ki = -0.0015;
     float Kd = -0.6;
-    float Kp = -5.5;
+    float Kp = -4.5;
 
     while (abs(error) > 1 || leftBack.get_actual_velocity() > 0.1)
     {
@@ -161,7 +164,46 @@ static void swingTurn(const int32_t forwardPower, const int32_t turnPower, const
     if(settle)
         pros::delay(driveSettle);
 }
+static void threeRightNew()
+{
+      topSystem.move_velocity(topVelocity);
+    //set initial chassis velocity
+    chassis->setMaxVelocity(120);
+    
+    //start lifts and sorting
+    SORT_SYS_ENABLE = true;
+    
+    setLoaders(loaderSetting::Forward);
 
+    //swing into tower and load
+   swingTurn(80, 21, 1670, 0, true);
+   /*
+   chassis->moveDistance(2.05_ft);
+   gyroTurn(72);
+   chassis->setMaxVelocity(100);
+   chassis->moveDistance(1.75_ft);
+   */
+    waitUntilPressCount(1, true);
+
+     setLoaders(1);
+    //move out 
+    chassis->moveDistance(-0.8_ft);
+    setLoaders(2);
+    gyroTurn(-60);
+    chassis->moveDistance(1_ft);
+    strafeAbstract(xModel, -100, 1400, 0);
+    setLoaders(0);
+    chassis->moveDistance(1.35_ft);
+    strafeAbstract(xModel, 100, 600, 0);
+    
+    gyroTurn(-20);
+    chassis->setMaxVelocity(80);
+    chassis->moveDistance(1_ft);
+    gyroTurn(-5);
+    waitUntilPressCount(3, true);
+    chassis->moveDistance(-1_ft);
+    
+}
 static void threeRight()
 {
     topSystem.move_velocity(topVelocity);
@@ -254,7 +296,8 @@ void runAuton()
 {
     init();
     runningAuton = true;
-    threeRight();
+  
+    threeRightNew();
     
     runningAuton = false;
 }
