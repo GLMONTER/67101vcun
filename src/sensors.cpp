@@ -9,7 +9,7 @@ pros::vision_signature_s_t BLUE_SIG = pros::Vision::signature_from_utility(1, -3
 pros::vision_signature_s_t RED_SIG = pros::Vision::signature_from_utility(2, 7969, 10049, 9010, -447, 815, 184, 2.500, 0);
 
 //Sensor init
-pros::Vision vSensor(8, pros::E_VISION_ZERO_CENTER);
+pros::Vision vSensor(1, pros::E_VISION_ZERO_CENTER);
 pros::ADIDigitalIn topLimit(8);
 pros::Distance distance_sensor(10);
 
@@ -22,11 +22,10 @@ extern bool canLimit;
 
 //tuning variables
 static int32_t delayEject = 500;
-static int32_t bottomSpeed = 127;
+static int32_t rearSpeed = 127;
 
 int32_t topVelocity = 385;
 static int32_t minVelocity = 360;
-
 
 //enable/disable sorting task
 bool SORT_SYS_ENABLE = true;
@@ -75,7 +74,7 @@ static bool canShoot()
 //The task will start at the beginning of the program with the correct ball color to start.
 void sort(void* sigPass)
 {
-	bottomSystem.move(bottomSpeed);
+	rearSystem.move(rearSpeed);
 	topSystem.move_velocity(topVelocity);
     pros::vision_signature_s_t sig =  *reinterpret_cast<pros::vision_signature_s_t*>(sigPass);
 	//resetting vision sensor LED color.
@@ -91,7 +90,7 @@ void sort(void* sigPass)
 
 	//set loader brake modes to lock so the alliance ball can stop at the top of the loader
 	topSystem.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
-	bottomSystem.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
+	rearSystem.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
 	
 	while(true)
 	{
@@ -120,7 +119,7 @@ void sort(void* sigPass)
 					std::cout<<"stopping"<<std::endl;
 					i = 0;
 				}
-				bottomSystem.move_velocity(0);
+				rearSystem.move_velocity(0);
 				if(runningAuton)
 					topSystem.move_velocity(0);
 				
@@ -147,7 +146,7 @@ void sort(void* sigPass)
 				if(!disableTop && controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
 					topSystem.move_velocity(-topVelocity);
 				if(!disableBottom)
-					bottomSystem.move(bottomSpeed);
+					rearSystem.move(rearSpeed);
 			}
 			else
 			{
@@ -158,7 +157,7 @@ void sort(void* sigPass)
 				{
 					if(topSystem.get_actual_velocity() > minVelocity)
 					{
-						bottomSystem.move(bottomSpeed);
+						rearSystem.move(rearSpeed);
 					}
 				}
 			}
@@ -182,21 +181,21 @@ void sort(void* sigPass)
 			vSensor.set_led(COLOR_RED);
 			#endif
 			if(!seeBall())
-				bottomSystem.move(bottomSpeed);
+				rearSystem.move(rearSpeed);
 
 			if(topSystem.get_actual_velocity() > minVelocity)
 			{
 				if(!disableTop && controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
 					topSystem.move_velocity(topVelocity);
 				if(!disableBottom)
-					bottomSystem.move(bottomSpeed);
+					rearSystem.move(rearSpeed);
 			}
 			else
 			{
 				if(!disableTop && controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
 					topSystem.move_velocity(topVelocity);
 				if(!canLimit)
-					bottomSystem.move_velocity(0);
+					rearSystem.move_velocity(0);
 			}
 		}
 		//if the alliance ball is not detected then search for the enemy ball for discarding.
@@ -212,7 +211,7 @@ void sort(void* sigPass)
 			if(!disableTop && controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
 				topSystem.move_velocity(-topVelocity);
 			if(!disableBottom)
-				bottomSystem.move(bottomSpeed);
+				rearSystem.move(rearSpeed);
 			pros::delay(delayEject);
 		}
 		//if nothing was found then just load like normal
@@ -232,11 +231,11 @@ void sort(void* sigPass)
 			if(!disableTop && controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
 				topSystem.move_velocity(topVelocity);
 			if(!disableBottom && (!seeBall && !canLimit))
-				bottomSystem.move(bottomSpeed);
+				rearSystem.move(rearSpeed);
 			if(!disableBottom && topSystem.get_actual_velocity() > minVelocity && controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
-				bottomSystem.move(bottomSpeed);
+				rearSystem.move(rearSpeed);
 			if(!canLimit && runningAuton && topSystem.get_actual_velocity() > minVelocity)
-				bottomSystem.move(bottomSpeed);
+				rearSystem.move(rearSpeed);
 
 		}
 		//make the thread sleep to prevent other threads from being starved of resources.

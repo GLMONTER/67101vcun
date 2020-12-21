@@ -2,17 +2,17 @@
 
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
 
-pros::Motor leftLoader(12, pros::E_MOTOR_GEARSET_06, false);
+pros::Motor leftLoader(2, pros::E_MOTOR_GEARSET_06, false);
 pros::Motor rightLoader(4, pros::E_MOTOR_GEARSET_06, true);
 
-pros::Motor rightFront(11, true);
+pros::Motor rightFront(6, true);
 pros::Motor leftFront(20, false);
-pros::Motor rightBack(1, true);
-pros::Motor leftBack(9, false);
+pros::Motor rightBack(18, true);
+pros::Motor leftBack(10, false);
 
 //includes flywheel, and the two lifts
 pros::Motor topSystem(5, pros::E_MOTOR_GEARSET_06, false);
-pros::Motor bottomSystem(19, pros::E_MOTOR_GEARSET_06, true);
+pros::Motor bottomSystem(19, pros::E_MOTOR_GEARSET_06, false);
 
 
 //toggles for lift
@@ -57,7 +57,7 @@ void setLoaders(const int setting)
         rightLoader.move(0);  
     }
 }
-
+#define failSafeSpeed 127
 void sortFailsafe()
 {
     //go forward with drum
@@ -81,16 +81,16 @@ void sortFailsafe()
     //if our forward toggle is on, then eat the balls :D
     if(buttonToggleF == true)
     {
-        topSystem.move(-127);
-		bottomSystem.move(-127);
+        topSystem.move(-failSafeSpeed);
+		bottomSystem.move(-failSafeSpeed);
     }
     //check if other toggle is on if we need to really stop the motor
     else
     {
         if(!buttonToggleR && !buttonToggleF)
         {
-            topSystem.move(-127);
-			bottomSystem.move(-127);
+            topSystem.move(-failSafeSpeed);
+			bottomSystem.move(-failSafeSpeed);
         }
     }
     //go backwards with drum
@@ -115,15 +115,15 @@ void sortFailsafe()
     //if backward button toggle is on, then start the motor backward
     if(buttonToggleR == true)
     {
-        topSystem.move(127);
-		bottomSystem.move(127);
+        topSystem.move(failSafeSpeed);
+		bottomSystem.move(failSafeSpeed);
     }
     //else, check if the forward toggle is off, then stop.
     else
     {
         if(!buttonToggleF && !buttonToggleR)
         {
-            topSystem.move(0);
+            //topSystem.move(0);
 		    bottomSystem.move(0);
         }
     }
