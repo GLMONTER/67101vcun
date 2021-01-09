@@ -11,8 +11,8 @@ pros::Motor rightBack(18, true);
 pros::Motor leftBack(10, false);
 
 //includes flywheel, and the two lifts
-pros::Motor topSystem(5, pros::E_MOTOR_GEARSET_06, false);
-pros::Motor bottomSystem(19, pros::E_MOTOR_GEARSET_06, false);
+pros::Motor topSystem(19, pros::E_MOTOR_GEARSET_06, false);
+pros::Motor rearSystem(5, pros::E_MOTOR_GEARSET_06, false);
 
 
 //toggles for lift
@@ -82,7 +82,7 @@ void sortFailsafe()
     if(buttonToggleF == true)
     {
         topSystem.move(-failSafeSpeed);
-		bottomSystem.move(-failSafeSpeed);
+		rearSystem.move(-failSafeSpeed);
     }
     //check if other toggle is on if we need to really stop the motor
     else
@@ -90,7 +90,7 @@ void sortFailsafe()
         if(!buttonToggleR && !buttonToggleF)
         {
             topSystem.move(-failSafeSpeed);
-			bottomSystem.move(-failSafeSpeed);
+			rearSystem.move(-failSafeSpeed);
         }
     }
     //go backwards with drum
@@ -116,7 +116,7 @@ void sortFailsafe()
     if(buttonToggleR == true)
     {
         topSystem.move(failSafeSpeed);
-		bottomSystem.move(failSafeSpeed);
+		rearSystem.move(failSafeSpeed);
     }
     //else, check if the forward toggle is off, then stop.
     else
@@ -124,7 +124,7 @@ void sortFailsafe()
         if(!buttonToggleF && !buttonToggleR)
         {
             //topSystem.move(0);
-		    bottomSystem.move(0);
+		    rearSystem.move(0);
         }
     }
 }

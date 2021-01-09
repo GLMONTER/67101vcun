@@ -11,8 +11,7 @@ pros::vision_signature_s_t RED_SIG = pros::Vision::signature_from_utility(2, 796
 //Sensor init
 pros::Vision vSensor(1, pros::E_VISION_ZERO_CENTER);
 pros::ADIDigitalIn topLimit(8);
-pros::Distance distance_sensor(10);
-
+pros::Distance distance_sensor(12);
 
 //bool that holds the state of the limiter
 extern bool canLimit;
@@ -22,10 +21,10 @@ extern bool canLimit;
 
 //tuning variables
 static int32_t delayEject = 500;
-static int32_t rearSpeed = 127;
+static int32_t mainSpeed = 127;
 
-int32_t topVelocity = 385;
-static int32_t minVelocity = 360;
+int32_t topVelocity = 600;
+static int32_t minVelocity = 450;
 
 //enable/disable sorting task
 bool SORT_SYS_ENABLE = true;
@@ -74,8 +73,8 @@ static bool canShoot()
 //The task will start at the beginning of the program with the correct ball color to start.
 void sort(void* sigPass)
 {
-	rearSystem.move(rearSpeed);
-	topSystem.move_velocity(topVelocity);
+	rearSystem.move(mainSpeed);
+	topSystem.move(mainSpeed);
     pros::vision_signature_s_t sig =  *reinterpret_cast<pros::vision_signature_s_t*>(sigPass);
 	//resetting vision sensor LED color.
 	vSensor.clear_led();
@@ -104,10 +103,12 @@ void sort(void* sigPass)
 		if(!controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2) && !runningAuton)
 		{
 			canLimit = true;
+			mainSpeed = 80;
 		}
 		else if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2) && !runningAuton)
 		{
 			canLimit = false;
+			mainSpeed = 127;
 		}
 		
 		if(seeBall() && canLimit)
@@ -116,12 +117,11 @@ void sort(void* sigPass)
 				i++;
 				if(i == 1000)
 				{
-					std::cout<<"stopping"<<std::endl;
 					i = 0;
 				}
 				rearSystem.move_velocity(0);
-				if(runningAuton)
-					topSystem.move_velocity(0);
+				topSystem.move_velocity(0);
+					
 				
 				continue;
 		}
@@ -133,31 +133,31 @@ void sort(void* sigPass)
 		{
 			if(!canLimit && runningAuton)
 			{
-				topSystem.move_velocity(topVelocity);
+				topSystem.move(mainSpeed);
 			}
 			std::cout<<"both"<<std::endl;
 			if(!controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2) && !runningAuton)
 			{
-				topSystem.move(0);
+				//topSystem.move(0);
 			}
 			if(First_rtn.y_middle_coord > Second_rtn.y_middle_coord)
 			{
 				vSensor.set_led(COLOR_GREEN);
 				if(!disableTop && controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
-					topSystem.move_velocity(-topVelocity);
+					topSystem.move(-mainSpeed);
 				if(!disableBottom)
-					rearSystem.move(rearSpeed);
+					rearSystem.move(mainSpeed);
 			}
 			else
 			{
 				vSensor.set_led(COLOR_GREEN);
 				if(!disableTop && controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
-					topSystem.move_velocity(topVelocity);
+					topSystem.move(mainSpeed);
 				if(!disableBottom)
 				{
 					if(topSystem.get_actual_velocity() > minVelocity)
 					{
-						rearSystem.move(rearSpeed);
+						rearSystem.move(mainSpeed);
 					}
 				}
 			}
@@ -169,34 +169,21 @@ void sort(void* sigPass)
 			std::cout<<"alliance"<<std::endl;
 			if(!controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2) && !runningAuton)
 			{
-				topSystem.move(0);
+			//	topSystem.move(0);
 			}
 			if(!canLimit && runningAuton)
 			{
-				topSystem.move_velocity(topVelocity);
+				topSystem.move(mainSpeed);
 			}
 			#ifdef BLUE
 			vSensor.set_led(COLOR_BLUE);
 			#else
 			vSensor.set_led(COLOR_RED);
 			#endif
-			if(!seeBall())
-				rearSystem.move(rearSpeed);
-
-			if(topSystem.get_actual_velocity() > minVelocity)
-			{
-				if(!disableTop && controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
-					topSystem.move_velocity(topVelocity);
-				if(!disableBottom)
-					rearSystem.move(rearSpeed);
-			}
-			else
-			{
-				if(!disableTop && controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
-					topSystem.move_velocity(topVelocity);
-				if(!canLimit)
-					rearSystem.move_velocity(0);
-			}
+			rearSystem.move(-mainSpeed);
+			
+			topSystem.move(-mainSpeed);
+			
 		}
 		//if the alliance ball is not detected then search for the enemy ball for discarding.
 		else
@@ -208,35 +195,38 @@ void sort(void* sigPass)
 			#else
 			vSensor.set_led(COLOR_BLUE);
 			#endif
-			if(!disableTop && controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
-				topSystem.move_velocity(-topVelocity);
+			
 			if(!disableBottom)
-				rearSystem.move(rearSpeed);
+				rearSystem.move(mainSpeed);
 			pros::delay(delayEject);
 		}
 		//if nothing was found then just load like normal
 		else
 		{
+			/*
 			if(!canLimit && runningAuton)
 			{
-				topSystem.move_velocity(topVelocity);
+				topSystem.move(mainSpeed);
 			}
-			std::cout<<"nothing"<<std::endl;
+			//std::cout<<"nothing"<<std::endl;
 			if(!controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2) && !runningAuton)
 			{
-				topSystem.move(0);
+				//topSystem.move(0);
 			}
+			*/
 			vSensor.set_led(COLOR_LIGHT_CORAL);
-
+			topSystem.move(-mainSpeed);
+			rearSystem.move(-mainSpeed);
+			/*
 			if(!disableTop && controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
-				topSystem.move_velocity(topVelocity);
+				topSystem.move(mainSpeed);
 			if(!disableBottom && (!seeBall && !canLimit))
-				rearSystem.move(rearSpeed);
+				rearSystem.move(mainSpeed);
 			if(!disableBottom && topSystem.get_actual_velocity() > minVelocity && controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
-				rearSystem.move(rearSpeed);
+				rearSystem.move(mainSpeed);
 			if(!canLimit && runningAuton && topSystem.get_actual_velocity() > minVelocity)
-				rearSystem.move(rearSpeed);
-
+				rearSystem.move(mainSpeed);
+*/
 		}
 		//make the thread sleep to prevent other threads from being starved of resources.
 		pros::Task::delay(10);

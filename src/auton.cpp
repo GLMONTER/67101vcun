@@ -1,6 +1,8 @@
 #include"main.h"
+bool runningAuton = false;
 
-pros::Imu imu(18);
+pros::Imu imu(21);
+/*
 extern pros::Distance distance_sensor;
 extern pros::ADIDigitalIn topLimit;
 
@@ -22,7 +24,7 @@ static void init()
    
     //release hood by spinning Trio.
 	topSystem.move(127);
-	bottomSystem.move(127);
+	rearSystem.move(127);
 	setLoaders(1);
 	pros::Task::delay(700);
 	topSystem.move(0);
@@ -177,12 +179,12 @@ static void threeRightNew()
 
     //swing into tower and load
    swingTurn(80, 21, 1670, 0, true);
-   /*
-   chassis->moveDistance(2.05_ft);
-   gyroTurn(72);
-   chassis->setMaxVelocity(100);
-   chassis->moveDistance(1.75_ft);
-   */
+   
+   //chassis->moveDistance(2.05_ft);
+  // gyroTurn(72);
+  // chassis->setMaxVelocity(100);
+  // chassis->moveDistance(1.75_ft);
+   
     waitUntilPressCount(1, true);
 
      setLoaders(1);
@@ -290,14 +292,14 @@ static void newHomeRow()
     pros::delay(1500);
     chassis->moveDistance(-2_ft);
 }
-
+*/
 //actually running the auton
 void runAuton()
 {
-    init();
-    runningAuton = true;
+   // init();
+    //runningAuton = true;
   
-    threeRightNew();
+    //threeRightNew();
     
-    runningAuton = false;
+   // runningAuton = false;
 }

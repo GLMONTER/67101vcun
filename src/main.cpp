@@ -8,7 +8,7 @@ void initialize()
     //pros::delay(2000);
 	pros::lcd::initialize();
 	
-	pros::Task pollTask(pollSensors, "poll");
+	//pros::Task pollTask(pollSensors, "poll");
 	#define RED
 	
 	#ifdef BLUE
@@ -18,7 +18,6 @@ void initialize()
 	#ifdef RED
 	pros::Task sortTask(sort, reinterpret_cast<void*>(&RED_SIG), "vision");
 	#endif
-	
 }
 
 void disabled()
@@ -65,12 +64,7 @@ void opcontrol()
 	lv_obj_set_pos(im,  0, -75);
 	lv_obj_set_drag(im, false);
 */	
-	//moveToPoint(12, 12, 0);
-
-	//trackPosition();
-
-
-
+	//moveToPoint(6, 0, 0);
 	while (true) 
 	{
 		static int i = 0;
@@ -90,7 +84,7 @@ void opcontrol()
 			}
 			
 			std::string topTemp = "TOP:" + std::to_string((int)topSystem.get_temperature()) 
-			+ " BOT:" + std::to_string((int)bottomSystem.get_temperature()) + " DRV STAT:" + faultStatus.c_str();
+			+ " BOT:" + std::to_string((int)rearSystem.get_temperature()) + " DRV STAT:" + faultStatus.c_str();
 	
 
 			controller.print(0, 0, "%s" , topTemp.c_str());
@@ -124,11 +118,11 @@ void opcontrol()
 
 		if(topToggle)
 		{
-			canLimit = true;
+			//canLimit = true;
 		}
 		else
 		{
-			canLimit = false;
+			//canLimit = false;
 		}
 
 		//a failsafe for the sorting system

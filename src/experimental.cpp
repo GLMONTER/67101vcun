@@ -8,8 +8,9 @@
 #define M_TRACKING_DISTANCE 7.5
 
 pros::ADIEncoder leftEncoder(3, 4, false);
-pros::ADIEncoder rightEncoder(1, 2, false);
-pros::ADIEncoder middleEncoder(5, 6, false);
+pros::ADIEncoder rightEncoder(5, 6, false);
+pros::ADIEncoder middleEncoder(1, 2, true);
+
 /*
 void writeEncoder()
 {
@@ -23,6 +24,7 @@ void writeEncoder()
     
 }
 */
+
 struct Position
 {
     float a;
@@ -44,7 +46,7 @@ void setDriveSpec(const int32_t leftFrontV,const int32_t leftBackV,const int32_t
     rightBack.move(rightBackV);
 }
 void trackPosition()
-{
+{    
     int32_t leftEncoderValue = leftEncoder.get_value();
     int32_t rightEncoderValue = rightEncoder.get_value();
     int32_t middleEncoderValue = middleEncoder.get_value();
@@ -100,10 +102,8 @@ void trackPosition()
     pros::lcd::print(2, "left :  %d\n", leftEncoder.get_value());
     pros::lcd::print(3, "right :  %d\n", rightEncoder.get_value());
     pros::lcd::print(4, "middle :  %d\n", middleEncoder.get_value());
-    
 
-
-    pros::delay(5);
+    pros::delay(10);
 }
 //PID function for the x axis
 float getNewX(const float target)
@@ -180,13 +180,15 @@ float getNewAngle(const float target)
 //calculating error between requested position and current position using pid and running the drive train
 void moveToPoint(const float x, const float y, const float angle)
 {
+    pros::Task::delay(2000);
+    std::cout<<"moving"<<std::endl;
     /*
     while(leftFront.get_actual_velocity() > 3 && leftBack.get_actual_velocity() > 3 
     && rightFront.get_actual_velocity() > 3 && rightBack.get_actual_velocity() > 3 && 
     (std::abs(globalPos.x - x) > 0.25) && (std::abs(globalPos.y - y) > 0.25) 
     && std::abs(globalPos.a - angle) > 5)
     */
-   while((std::abs(globalPos.x - x) > 0.25) && (std::abs(globalPos.y - y) > 0.25) )
+   while((std::abs(globalPos.x - x) > 0.25) || (std::abs(globalPos.y - y) > 0.25) )
     {
         trackPosition();
         
