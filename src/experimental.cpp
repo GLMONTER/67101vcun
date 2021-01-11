@@ -114,9 +114,9 @@ float getNewX(const float target)
     static float previousError;
     static float driveValue;
 
-    const float Ki = 0.0015f;
+    const float Ki = 0.01f;
     const float Kd = 0.6f;
-    const float Kp = 6.5f;
+    const float Kp = 10.5f;
 
     error = target - globalPos.x;
     integral = integral + error;
@@ -138,11 +138,11 @@ float getNewY(const float target)
     static float previousError;
     static float driveValue;
 
-    const float Ki = 0.0015f;
+    const float Ki = 0.01f;
     const float Kd = 0.6f;
-    const float Kp = 6.5f;
+    const float Kp = 10.5f;
 
-    error = target - globalPos.x;
+    error = target - globalPos.y;
     integral = integral + error;
     if(abs(error) < 0.25f)
     {
@@ -180,7 +180,7 @@ float getNewAngle(const float target)
 //calculating error between requested position and current position using pid and running the drive train
 void moveToPoint(const float x, const float y, const float angle)
 {
-    pros::Task::delay(2000);
+    pros::Task::delay(1000);
     std::cout<<"moving"<<std::endl;
     /*
     while(leftFront.get_actual_velocity() > 3 && leftBack.get_actual_velocity() > 3 

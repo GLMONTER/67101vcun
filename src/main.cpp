@@ -16,7 +16,7 @@ void initialize()
 	pros::Task sortTask(sort, reinterpret_cast<void*>(&BLUE_SIG),"vision");
 	#endif
 	#ifdef RED
-	pros::Task sortTask(sort, reinterpret_cast<void*>(&RED_SIG), "vision");
+	//pros::Task sortTask(sort, reinterpret_cast<void*>(&RED_SIG), "vision");
 	#endif
 }
 
@@ -64,7 +64,7 @@ void opcontrol()
 	lv_obj_set_pos(im,  0, -75);
 	lv_obj_set_drag(im, false);
 */	
-	//moveToPoint(6, 0, 0);
+	moveToPoint(6, -18, 0);
 	while (true) 
 	{
 		static int i = 0;
