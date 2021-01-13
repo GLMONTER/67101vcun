@@ -5,7 +5,7 @@ void initialize()
 {
 	//init gyro
     imu.reset();
-    //pros::delay(2000);
+   // pros::Task::delay(2000);
 	pros::lcd::initialize();
 	
 	//pros::Task pollTask(pollSensors, "poll");
@@ -64,7 +64,7 @@ void opcontrol()
 	lv_obj_set_pos(im,  0, -75);
 	lv_obj_set_drag(im, false);
 */	
-	moveToPoint(6, -18, 0);
+	moveToPoint(6, 6, 1.6);
 	while (true) 
 	{
 		static int i = 0;

@@ -11,20 +11,6 @@ pros::ADIEncoder leftEncoder(3, 4, false);
 pros::ADIEncoder rightEncoder(5, 6, false);
 pros::ADIEncoder middleEncoder(1, 2, true);
 
-/*
-void writeEncoder()
-{
-    while(true)
-    {
-        std::cout<<"Left : "<<leftEncoder.get_value()<<std::endl;
-        std::cout<<"Right : "<<rightEncoder.get_value()<<std::endl;
-        std::cout<<"Middle : "<<middleEncoder.get_value()<<std::endl;
-        pros::delay(100);
-    }
-    
-}
-*/
-
 struct Position
 {
     float a;
@@ -95,13 +81,14 @@ void trackPosition()
     globalPos.y += angleTraveledRear * -sinP;
     globalPos.x += angleTraveledRear * cosP;
 
-    globalPos.a = fullAngleTraveled;
+    globalPos.a += fullAngleTraveled;
     pros::lcd::print(0, "x :  %f\n", globalPos.x);
     pros::lcd::print(1, "y :  %f\n", globalPos.y);
 
     pros::lcd::print(2, "left :  %d\n", leftEncoder.get_value());
     pros::lcd::print(3, "right :  %d\n", rightEncoder.get_value());
     pros::lcd::print(4, "middle :  %d\n", middleEncoder.get_value());
+    pros::lcd::print(5, "imu :  %f\n", globalPos.a);
 
     pros::delay(10);
 }
@@ -162,11 +149,12 @@ float getNewAngle(const float target)
     static float previousError;
     static float driveValue;
 
-    const float Ki = -0.0015f;
+    const float Ki = -0.01f;
     const float Kd = -0.6f;
-    const float Kp = -6.5f;
+    const float Kp = -75.5f;
     //subject to change heading for yaw
-    error = target - imu.get_heading();
+    
+    error = target - globalPos.a;
     integral = integral + error;
     if(abs(error) < 1.0f)
     {
@@ -188,19 +176,20 @@ void moveToPoint(const float x, const float y, const float angle)
     (std::abs(globalPos.x - x) > 0.25) && (std::abs(globalPos.y - y) > 0.25) 
     && std::abs(globalPos.a - angle) > 5)
     */
-   while((std::abs(globalPos.x - x) > 0.25) || (std::abs(globalPos.y - y) > 0.25) )
+   while((std::abs(globalPos.x - x) > 0.25) || (std::abs(globalPos.y - y) > 0.25) || (std::abs(globalPos.a - angle) > 0.25))
     {
         trackPosition();
         
         float tempY = getNewY(y);
         float tempX = getNewX(x);
-        float tempAngle = 0;//getNewAngle(angle);
+        float tempAngle = -getNewAngle(angle);
 
-        int32_t frontLeftV = tempY + tempX - tempAngle;
+        int32_t frontLeftV = tempY + tempX + tempAngle;
         int32_t frontRightV = tempY - tempX + tempAngle;
-        std::cout<<"y : "<<tempY<<" x : "<<tempX<<std::endl;
+        std::cout<<"y : "<<tempY<<" x : "<<tempX<<" A "<<tempAngle<<std::endl;
+        std::cout<<"pos : "<<globalPos.y << " " << globalPos.x << " "<<globalPos.a<<std::endl;
         int32_t backLeftV = tempY - tempX - tempAngle;
-        int32_t backRightV = tempY + tempX + tempAngle;
+        int32_t backRightV = tempY + tempX - tempAngle;
         setDriveSpec(frontLeftV, frontRightV, backLeftV, backRightV);
 
         pros::delay(10);
