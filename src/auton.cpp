@@ -2,7 +2,7 @@
 bool runningAuton = false;
 
 pros::Imu imu(21);
-/*
+
 extern pros::Distance distance_sensor;
 extern pros::ADIDigitalIn topLimit;
 
@@ -292,7 +292,7 @@ static void newHomeRow()
     pros::delay(1500);
     chassis->moveDistance(-2_ft);
 }
-*/
+
 //actually running the auton
 void runAuton()
 {

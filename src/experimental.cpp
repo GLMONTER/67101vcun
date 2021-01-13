@@ -56,7 +56,7 @@ void trackPosition()
         float r = rightMovement / fullAngleTraveled; //radious of the circle the robot travled around with the right side of robot
         halfOfAngleTraveled = fullAngleTraveled / 2.0;
         float sinHalfOfAngleTraveled = sin(halfOfAngleTraveled);
-        hypotenuse = ((r + L_R_TRACKING_DISTANCE) * sinHalfOfAngleTraveled) * 2.0;
+        hypotenuse = ((r + (L_R_TRACKING_DISTANCE / 2)) * sinHalfOfAngleTraveled) * 2.0;
 
         //same thing but with back of robot and not sides
         float r2 = middleMovement / fullAngleTraveled;
@@ -101,9 +101,9 @@ float getNewX(const float target)
     static float previousError;
     static float driveValue;
 
-    const float Ki = 0.01f;
+    const float Ki = 0.005f;
     const float Kd = 0.6f;
-    const float Kp = 10.5f;
+    const float Kp = 8.5f;
 
     error = target - globalPos.x;
     integral = integral + error;
@@ -125,9 +125,9 @@ float getNewY(const float target)
     static float previousError;
     static float driveValue;
 
-    const float Ki = 0.01f;
+    const float Ki = 0.005f;
     const float Kd = 0.6f;
-    const float Kp = 10.5f;
+    const float Kp = 8.5f;
 
     error = target - globalPos.y;
     integral = integral + error;
@@ -149,9 +149,9 @@ float getNewAngle(const float target)
     static float previousError;
     static float driveValue;
 
-    const float Ki = -0.01f;
+    const float Ki = -0.005;
     const float Kd = -0.6f;
-    const float Kp = -75.5f;
+    const float Kp = -50.5f;
     //subject to change heading for yaw
     
     error = target - globalPos.a;
@@ -180,17 +180,20 @@ void moveToPoint(const float x, const float y, const float angle)
     {
         trackPosition();
         
-        float tempY = getNewY(y);
-        float tempX = getNewX(x);
+        float tempY = getNewY(y) + sin(globalPos.a);
+        float tempX = getNewX(x) + cos(globalPos.a);
         float tempAngle = -getNewAngle(angle);
-
+ 
         int32_t frontLeftV = tempY + tempX + tempAngle;
-        int32_t frontRightV = tempY - tempX + tempAngle;
-        std::cout<<"y : "<<tempY<<" x : "<<tempX<<" A "<<tempAngle<<std::endl;
-        std::cout<<"pos : "<<globalPos.y << " " << globalPos.x << " "<<globalPos.a<<std::endl;
-        int32_t backLeftV = tempY - tempX - tempAngle;
+        int32_t frontRightV = tempY - tempX - tempAngle;
+
+        int32_t backLeftV = tempY - tempX + tempAngle;
         int32_t backRightV = tempY + tempX - tempAngle;
-        setDriveSpec(frontLeftV, frontRightV, backLeftV, backRightV);
+        std::cout<<"x : "<<tempX<<" y : "<<tempY<<" A "<<tempAngle<<std::endl;
+        std::cout<<"pos : "<<globalPos.x << " " << globalPos.y << " "<<globalPos.a<<std::endl<<std::endl;
+        
+       
+        setDriveSpec(frontLeftV, backLeftV, frontRightV, backRightV);
 
         pros::delay(10);
     }

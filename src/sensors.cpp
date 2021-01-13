@@ -9,7 +9,7 @@ pros::vision_signature_s_t BLUE_SIG = pros::Vision::signature_from_utility(1, -3
 pros::vision_signature_s_t RED_SIG = pros::Vision::signature_from_utility(2, 7969, 10049, 9010, -447, 815, 184, 2.500, 0);
 
 //Sensor init
-pros::Vision vSensor(1, pros::E_VISION_ZERO_CENTER);
+pros::Vision vSensor(3, pros::E_VISION_ZERO_CENTER);
 pros::ADIDigitalIn topLimit(8);
 pros::Distance distance_sensor(12);
 
@@ -17,7 +17,7 @@ pros::Distance distance_sensor(12);
 extern bool canLimit;
 
 //define the alliance color to sort the correct ball color.
-#define BLUE
+#define RED
 
 //tuning variables
 static int32_t delayEject = 500;
@@ -25,7 +25,7 @@ static int32_t mainSpeed = 127;
 
 int32_t topVelocity = 600;
 static int32_t minVelocity = 450;
-
+bool getToSpeed = false;
 //enable/disable sorting task
 bool SORT_SYS_ENABLE = true;
 
@@ -113,16 +113,9 @@ void sort(void* sigPass)
 		
 		if(seeBall() && canLimit)
 		{
-				static int i = 0;
-				i++;
-				if(i == 1000)
-				{
-					i = 0;
-				}
 				rearSystem.move_velocity(0);
 				topSystem.move_velocity(0);
-					
-				
+				getToSpeed = true;
 				continue;
 		}
 
@@ -167,10 +160,7 @@ void sort(void* sigPass)
 		if(First_rtn.signature != 255 && First_rtn.width > 40)
 		{
 			std::cout<<"alliance"<<std::endl;
-			if(!controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2) && !runningAuton)
-			{
-			//	topSystem.move(0);
-			}
+	
 			if(!canLimit && runningAuton)
 			{
 				topSystem.move(mainSpeed);
@@ -181,8 +171,17 @@ void sort(void* sigPass)
 			vSensor.set_led(COLOR_RED);
 			#endif
 			rearSystem.move(-mainSpeed);
+			if(getToSpeed)
+			{
+				pros::Task::delay(250);
+				topSystem.move(-mainSpeed);
+				getToSpeed = false;
+			}
+			else
+			{
+				topSystem.move(-mainSpeed);
+			}
 			
-			topSystem.move(-mainSpeed);
 			
 		}
 		//if the alliance ball is not detected then search for the enemy ball for discarding.
@@ -195,7 +194,7 @@ void sort(void* sigPass)
 			#else
 			vSensor.set_led(COLOR_BLUE);
 			#endif
-			
+			topSystem.move(-127);
 			if(!disableBottom)
 				rearSystem.move(mainSpeed);
 			pros::delay(delayEject);

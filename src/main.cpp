@@ -9,14 +9,14 @@ void initialize()
 	pros::lcd::initialize();
 	
 	//pros::Task pollTask(pollSensors, "poll");
-	#define RED
+	#define BLUE
 	
 	#ifdef BLUE
 	//start the async sort task to begin sorting during driver control.
 	pros::Task sortTask(sort, reinterpret_cast<void*>(&BLUE_SIG),"vision");
 	#endif
 	#ifdef RED
-	//pros::Task sortTask(sort, reinterpret_cast<void*>(&RED_SIG), "vision");
+	pros::Task sortTask(sort, reinterpret_cast<void*>(&RED_SIG), "vision");
 	#endif
 }
 
@@ -64,7 +64,7 @@ void opcontrol()
 	lv_obj_set_pos(im,  0, -75);
 	lv_obj_set_drag(im, false);
 */	
-	moveToPoint(6, 6, 1.6);
+	//moveToPoint(0, 0, 1.6);
 	while (true) 
 	{
 		static int i = 0;
