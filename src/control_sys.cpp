@@ -43,13 +43,13 @@ void setLoaders(const int setting)
 {
     if(setting == loaderSetting::Forward)
     {
-        leftLoader.move(127);
-        rightLoader.move(127);
+        leftLoader.move(-127);
+        rightLoader.move(-127);
     }
     else if(setting == loaderSetting::Backward)
     {
-        leftLoader.move(-127);
-        rightLoader.move(-127); 
+        leftLoader.move(127);
+        rightLoader.move(127); 
     }
     else if(setting == loaderSetting::Disabled)
     {

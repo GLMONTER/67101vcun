@@ -1,5 +1,5 @@
 #include"main.h"
-bool runningAuton = false;
+extern bool runningAuton;
 
 pros::Imu imu(21);
 
@@ -110,27 +110,43 @@ static void gyroTurn(const float deg)
     }
     setDrive(0,0);
 }
-
-
-static auto chassis = ChassisControllerBuilder()
-    .withMotors
-    (
-        20,  // Top left
-        11, // Top right (reversed)
-        1, // Bottom right (reversed)
-        9   // Bottom left
-    )
-    
+std::shared_ptr<OdomChassisController> chassis =
+  ChassisControllerBuilder()
+    .withMotors(20, 6, 18, 10) // left motor is 1, right motor is 2 (reversed)
+    // green gearset, 4 inch wheel diameter, 11.5 inch wheelbase
+    .withDimensions(AbstractMotor::gearset::green, {{4_in, 9_in}, imev5GreenTPR})
     .withGains(
         {0.002, 0.0005, 0.0001}, // Distance controller gains
         {0.0025, 0.0005, 0.0001}, // Turn controller gains
         {0.0012, 0.0005, 0.0001})  // Angle controller gains (helps drive straight)
-        
-
-    .withDimensions(AbstractMotor::gearset::green, {{4_in, 11.5_in}, imev5GreenTPR})
-    .withOdometry()
+    // left encoder in ADI ports A & B, right encoder in ADI ports C & D (reversed)
+ .withSensors(
+        ADIEncoder{'C', 'D', false}, // left encoder in ADI ports A & B
+        ADIEncoder{'E', 'F', false},  // right encoder in ADI ports C & D (reversed)
+        ADIEncoder{'A', 'B', true}  // middle encoder in ADI ports E & F
+    )    // specify the tracking wheels diameter (2.75 in), track (7 in), and TPR (360)
+        .withOdometry({{2.783_in, 15.25_in, 7.5_in, 2.783_in}, quadEncoderTPR}, StateMode::FRAME_TRANSFORMATION)
     .buildOdometry();
 
+/*
+static auto chassis = ChassisControllerBuilder()
+    .withMotors(20, 6, 18, 10) // left motor is 1, right motor is 2 (reversed)
+    // green gearset, 4 inch wheel diameter, 11.5 inch wheelbase
+    .withDimensions(AbstractMotor::gearset::green, {{4_in, 16_in}, imev5GreenTPR})
+     .withGains(
+        {0.002, 0.0005, 0.0001}, // Distance controller gains
+        {0.0025, 0.0005, 0.0001}, // Turn controller gains
+        {0.0012, 0.0005, 0.0001})  // Angle controller gains (helps drive straight)
+    .withSensors(
+        ADIEncoder{'C', 'D', false}, // left encoder in ADI ports A & B
+        ADIEncoder{'E', 'F', false},  // right encoder in ADI ports C & D (reversed)
+        ADIEncoder{'A', 'B', true}  // middle encoder in ADI ports E & F
+    )
+    // specify the tracking wheels diameter (2.75 in), track (7 in), and TPR (360)
+    // specify the middle encoder distance (1 in) and diameter (2.75 in)
+    .withOdometry({{2.75_in, 15.25_in, 6.5_in, 2.75_in}, quadEncoderTPR})
+    .buildOdometry();
+*/
 auto xModel = std::dynamic_pointer_cast<XDriveModel>(chassis->getModel());
 
 //function to see when the robot shoots a ball into the tower.
@@ -292,14 +308,27 @@ static void newHomeRow()
     pros::delay(1500);
     chassis->moveDistance(-2_ft);
 }
+std::shared_ptr<AsyncMotionProfileController> profileController =
+  AsyncMotionProfileControllerBuilder()
+    .withLimits({
+      1.0, // Maximum linear velocity of the Chassis in m/s
+      2.0, // Maximum linear acceleration of the Chassis in m/s/s
+      10.0 // Maximum linear jerk of the Chassis in m/s/s/s
+    })
+    .withOutput(chassis)
+    .buildMotionProfileController();
 
 //actually running the auton
 void runAuton()
 {
-   // init();
-    //runningAuton = true;
-  
-    //threeRightNew();
-    
-   // runningAuton = false;
+    init();
+    runningAuton = true;
+    chassis->driveToPoint({1.5_ft, 0.25_ft});
+    chassis->turnToAngle(45_deg);
+    SORT_SYS_ENABLE = true;
+    chassis->moveDistance(0.3_ft);
+    waitUntilPressCount(1, false);
+    chassis->moveDistance(-0.75_ft);
+
+    runningAuton = false;
 }

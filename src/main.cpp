@@ -51,7 +51,7 @@ bool canLimit = false;
 static bool topToggle = false;
 static bool topPressed;
 extern void trackPosition();
-extern void moveToPoint(const float x, const float y, const float angle);
+//extern void moveToPoint(const float x, const float y, const float angle);
 void opcontrol() 
 {
 	/*

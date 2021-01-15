@@ -25,6 +25,8 @@ static int32_t mainSpeed = 127;
 
 int32_t topVelocity = 600;
 static int32_t minVelocity = 450;
+
+//make sure the top system can get to speed before shooting occurs
 bool getToSpeed = false;
 //enable/disable sorting task
 bool SORT_SYS_ENABLE = true;
@@ -113,10 +115,10 @@ void sort(void* sigPass)
 		
 		if(seeBall() && canLimit)
 		{
-				rearSystem.move_velocity(0);
-				topSystem.move_velocity(0);
-				getToSpeed = true;
-				continue;
+			rearSystem.move_velocity(0);
+			topSystem.move_velocity(0);
+			getToSpeed = true;
+			continue;
 		}
 
         /*255 returns if no objects of stated signature is found.*/
@@ -181,8 +183,6 @@ void sort(void* sigPass)
 			{
 				topSystem.move(-mainSpeed);
 			}
-			
-			
 		}
 		//if the alliance ball is not detected then search for the enemy ball for discarding.
 		else
@@ -202,30 +202,9 @@ void sort(void* sigPass)
 		//if nothing was found then just load like normal
 		else
 		{
-			/*
-			if(!canLimit && runningAuton)
-			{
-				topSystem.move(mainSpeed);
-			}
-			//std::cout<<"nothing"<<std::endl;
-			if(!controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2) && !runningAuton)
-			{
-				//topSystem.move(0);
-			}
-			*/
 			vSensor.set_led(COLOR_LIGHT_CORAL);
 			topSystem.move(-mainSpeed);
 			rearSystem.move(-mainSpeed);
-			/*
-			if(!disableTop && controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
-				topSystem.move(mainSpeed);
-			if(!disableBottom && (!seeBall && !canLimit))
-				rearSystem.move(mainSpeed);
-			if(!disableBottom && topSystem.get_actual_velocity() > minVelocity && controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
-				rearSystem.move(mainSpeed);
-			if(!canLimit && runningAuton && topSystem.get_actual_velocity() > minVelocity)
-				rearSystem.move(mainSpeed);
-*/
 		}
 		//make the thread sleep to prevent other threads from being starved of resources.
 		pros::Task::delay(10);

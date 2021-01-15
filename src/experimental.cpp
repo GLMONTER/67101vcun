@@ -1,3 +1,4 @@
+
 #include"main.h"
 //for trig functions
 #include<cmath>
@@ -170,12 +171,7 @@ void moveToPoint(const float x, const float y, const float angle)
 {
     pros::Task::delay(1000);
     std::cout<<"moving"<<std::endl;
-    /*
-    while(leftFront.get_actual_velocity() > 3 && leftBack.get_actual_velocity() > 3 
-    && rightFront.get_actual_velocity() > 3 && rightBack.get_actual_velocity() > 3 && 
-    (std::abs(globalPos.x - x) > 0.25) && (std::abs(globalPos.y - y) > 0.25) 
-    && std::abs(globalPos.a - angle) > 5)
-    */
+   
    while((std::abs(globalPos.x - x) > 0.25) || (std::abs(globalPos.y - y) > 0.25) || (std::abs(globalPos.a - angle) > 0.25))
     {
         trackPosition();
