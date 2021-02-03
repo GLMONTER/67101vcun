@@ -17,7 +17,7 @@ pros::Distance distance_sensor(12);
 extern bool canLimit;
 
 //define the alliance color to sort the correct ball color.
-#define RED
+#define BLUE
 
 //tuning variables
 static int32_t delayEject = 500;
@@ -38,11 +38,11 @@ void pollSensors()
 {
 	while(true)
 	{
-		while(distance_sensor.get() > 15)
+		while(distance_sensor.get() > 7)
 		{
 			continue;
 		}
-		while(distance_sensor.get() < 25)
+		while(distance_sensor.get() < 100)
 		{
 			continue;
 		}
@@ -175,7 +175,7 @@ void sort(void* sigPass)
 			rearSystem.move(-mainSpeed);
 			if(getToSpeed)
 			{
-				pros::Task::delay(250);
+				pros::delay(100);
 				topSystem.move(-mainSpeed);
 				getToSpeed = false;
 			}

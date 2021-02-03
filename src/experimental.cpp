@@ -3,6 +3,7 @@
 //for trig functions
 #include<cmath>
 
+
 #define WHEEL_DIAM 2.783
 #define SPIN_TO (WHEEL_DIAM * PI / 360)
 #define L_R_TRACKING_DISTANCE 7.5
@@ -176,14 +177,18 @@ void moveToPoint(const float x, const float y, const float angle)
     {
         trackPosition();
         
-        float tempY = getNewY(y) + sin(globalPos.a);
-        float tempX = getNewX(x) + cos(globalPos.a);
+        float tempY = getNewY(y);
+        float tempX = getNewX(x);
         float tempAngle = -getNewAngle(angle);
- 
-        int32_t frontLeftV = tempY + tempX + tempAngle;
+        float angleDifference  = globalPos.a + angle;
+        
+        if(globalPos.a > 360)
+            globalPos.a = remainder(globalPos.a, 360);
+        int32_t frontLeftV = tan(45 - angleDifference);
+        int32_t backLeftV = tan(-45 - angleDifference);
         int32_t frontRightV = tempY - tempX - tempAngle;
-
-        int32_t backLeftV = tempY - tempX + tempAngle;
+        
+        
         int32_t backRightV = tempY + tempX - tempAngle;
         std::cout<<"x : "<<tempX<<" y : "<<tempY<<" A "<<tempAngle<<std::endl;
         std::cout<<"pos : "<<globalPos.x << " " << globalPos.y << " "<<globalPos.a<<std::endl<<std::endl;

@@ -4,12 +4,13 @@
 void initialize()
 {
 	//init gyro
-    imu.reset();
+   // imu.reset();
    // pros::Task::delay(2000);
 	pros::lcd::initialize();
 	
-	//pros::Task pollTask(pollSensors, "poll");
-	#define BLUE
+	pros::Task pollTask(pollSensors, "poll");
+	//IF THIS IS RED then you are on red team
+	#define RED
 	
 	#ifdef BLUE
 	//start the async sort task to begin sorting during driver control.

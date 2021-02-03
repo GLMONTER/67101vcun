@@ -35,7 +35,7 @@ static void init()
 bool runningAuton = false;
 
 //wait until a certain number of balls have gone through
-static void waitUntilPressCount(const unsigned int pressCount, const bool waitUntilHold)
+static void waitUntilPressCount(const unsigned int pressCount, const bool waitUntilHold, const unsigned int delayUntilHold)
 {
     static bool printed = false;
 
@@ -68,6 +68,7 @@ static void waitUntilPressCount(const unsigned int pressCount, const bool waitUn
         }
         std::cout<<"finished"<<std::endl;
     }
+    pros::delay(delayUntilHold);
     canLimit = true;
 }
 
@@ -123,7 +124,7 @@ std::shared_ptr<OdomChassisController> chassis =
  .withSensors(
         ADIEncoder{'C', 'D', false}, // left encoder in ADI ports A & B
         ADIEncoder{'E', 'F', false},  // right encoder in ADI ports C & D (reversed)
-        ADIEncoder{'A', 'B', true}  // middle encoder in ADI ports E & F
+        ADIEncoder{'A', 'B', false}  // middle encoder in ADI ports E & F
     )    // specify the tracking wheels diameter (2.75 in), track (7 in), and TPR (360)
         .withOdometry({{2.783_in, 15.25_in, 7.5_in, 2.783_in}, quadEncoderTPR}, StateMode::FRAME_TRANSFORMATION)
     .buildOdometry();
@@ -201,7 +202,7 @@ static void threeRightNew()
   // chassis->setMaxVelocity(100);
   // chassis->moveDistance(1.75_ft);
    
-    waitUntilPressCount(1, true);
+    waitUntilPressCount(1, true, 0);
 
      setLoaders(1);
     //move out 
@@ -218,7 +219,7 @@ static void threeRightNew()
     chassis->setMaxVelocity(80);
     chassis->moveDistance(1_ft);
     gyroTurn(-5);
-    waitUntilPressCount(3, true);
+    waitUntilPressCount(3, true, 0);
     chassis->moveDistance(-1_ft);
     
 }
@@ -239,7 +240,7 @@ static void threeRight()
    gyroTurn(66);
    chassis->setMaxVelocity(110);
    chassis->moveDistance(1.8_ft);
-    waitUntilPressCount(1, true);
+    waitUntilPressCount(1, true,0);
 
      
     //move out 
@@ -251,7 +252,7 @@ static void threeRight()
     chassis->moveDistance(2_ft);
     gyroTurn(-35);
     chassis->moveDistance(0.75_ft);
-    waitUntilPressCount(3, false);
+    waitUntilPressCount(3, false, 0);
     chassis->moveDistance(-1_ft);
 
 }
@@ -323,11 +324,14 @@ void runAuton()
 {
     init();
     runningAuton = true;
-    chassis->driveToPoint({1.5_ft, 0.25_ft});
-    chassis->turnToAngle(45_deg);
+    chassis->driveToPoint({1.55_ft, -0.5_ft});
+    gyroTurn(55);
     SORT_SYS_ENABLE = true;
-    chassis->moveDistance(0.3_ft);
-    waitUntilPressCount(1, false);
+    chassis->setMaxVelocity(100);
+    chassis->moveDistance(1.1_ft);
+    waitUntilPressCount(1, false, 750);
+    
+
     chassis->moveDistance(-0.75_ft);
 
     runningAuton = false;
