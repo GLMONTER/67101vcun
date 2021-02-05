@@ -38,14 +38,17 @@ void pollSensors()
 {
 	while(true)
 	{
-		while(distance_sensor.get() > 7)
+		while(distance_sensor.get() > 100)
 		{
+			pros::delay(10);
 			continue;
 		}
-		while(distance_sensor.get() < 100)
+		while(distance_sensor.get() < 60)
 		{
+			pros::delay(10);
 			continue;
 		}
+		
 		pros::lcd::print(4, "%d", limitPresses);
 		limitPresses++;
 		pros::delay(10);
@@ -104,6 +107,7 @@ void sort(void* sigPass)
 		pros::vision_object_s_t Second_rtn = vSensor.get_by_sig(0, ENEMEY_SIG);
 		if(!controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2) && !runningAuton)
 		{
+			std::cout<<runningAuton<<std::endl;
 			canLimit = true;
 			mainSpeed = 80;
 		}
@@ -128,13 +132,10 @@ void sort(void* sigPass)
 		{
 			if(!canLimit && runningAuton)
 			{
-				topSystem.move(mainSpeed);
+				topSystem.move(-mainSpeed);
 			}
 			std::cout<<"both"<<std::endl;
-			if(!controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2) && !runningAuton)
-			{
-				//topSystem.move(0);
-			}
+			
 			if(First_rtn.y_middle_coord > Second_rtn.y_middle_coord)
 			{
 				vSensor.set_led(COLOR_GREEN);
@@ -150,22 +151,19 @@ void sort(void* sigPass)
 					topSystem.move(mainSpeed);
 				if(!disableBottom)
 				{
-					if(topSystem.get_actual_velocity() > minVelocity)
-					{
-						rearSystem.move(mainSpeed);
-					}
+					rearSystem.move(mainSpeed);
 				}
 			}
 		}
 		//if the alliance color ball was found the just load up
 		else
-		if(First_rtn.signature != 255 && First_rtn.width > 40)
+		if(First_rtn.signature != 255 && First_rtn.width > 60)
 		{
 			std::cout<<"alliance"<<std::endl;
 	
 			if(!canLimit && runningAuton)
 			{
-				topSystem.move(mainSpeed);
+				topSystem.move(-mainSpeed);
 			}
 			#ifdef BLUE
 			vSensor.set_led(COLOR_BLUE);
@@ -175,7 +173,7 @@ void sort(void* sigPass)
 			rearSystem.move(-mainSpeed);
 			if(getToSpeed)
 			{
-				pros::delay(100);
+				pros::delay(200);
 				topSystem.move(-mainSpeed);
 				getToSpeed = false;
 			}
@@ -186,7 +184,7 @@ void sort(void* sigPass)
 		}
 		//if the alliance ball is not detected then search for the enemy ball for discarding.
 		else
-		if(Second_rtn.signature != 255 && Second_rtn.width > 40)
+		if(Second_rtn.signature != 255 && Second_rtn.width > 60)
 		{
 			std::cout<<"enemy"<<std::endl;
 			#ifdef BLUE

@@ -1,5 +1,5 @@
 #include"main.h"
-extern bool runningAuton;
+
 
 pros::Imu imu(21);
 
@@ -95,7 +95,7 @@ static void gyroTurn(const float deg)
     {
         pros::lcd::print(0, "val: %f\n", imu.get_yaw());
         error =  target - imu.get_yaw();
-        printf("%f \n", error);
+      //  printf("%f \n", error);
         integral = integral + error;
         if (abs(error) < 2)
         {
@@ -104,7 +104,6 @@ static void gyroTurn(const float deg)
         derivative = error - perror;
         perror = error;
         value = (integral*Ki) + (derivative*Kd) + (error*Kp);
-        
         setDrive(-value, value);
         
         pros::delay(5);
@@ -117,13 +116,13 @@ std::shared_ptr<OdomChassisController> chassis =
     // green gearset, 4 inch wheel diameter, 11.5 inch wheelbase
     .withDimensions(AbstractMotor::gearset::green, {{4_in, 9_in}, imev5GreenTPR})
     .withGains(
-        {0.002, 0.0005, 0.0001}, // Distance controller gains
+        {0.0018, 0.0005, 0.0001}, // Distance controller gains
         {0.0025, 0.0005, 0.0001}, // Turn controller gains
-        {0.0012, 0.0005, 0.0001})  // Angle controller gains (helps drive straight)
+        {0.001, 0.0005, 0.0001})  // Angle controller gains (helps drive straight)
     // left encoder in ADI ports A & B, right encoder in ADI ports C & D (reversed)
  .withSensors(
         ADIEncoder{'C', 'D', false}, // left encoder in ADI ports A & B
-        ADIEncoder{'E', 'F', false},  // right encoder in ADI ports C & D (reversed)
+        ADIEncoder{'E', 'F', false}, // right encoder in ADI ports C & D (reversed)
         ADIEncoder{'A', 'B', false}  // middle encoder in ADI ports E & F
     )    // specify the tracking wheels diameter (2.75 in), track (7 in), and TPR (360)
         .withOdometry({{2.783_in, 15.25_in, 7.5_in, 2.783_in}, quadEncoderTPR}, StateMode::FRAME_TRANSFORMATION)
@@ -318,21 +317,49 @@ std::shared_ptr<AsyncMotionProfileController> profileController =
     })
     .withOutput(chassis)
     .buildMotionProfileController();
+void right()
+{    
+    chassis->setMaxVelocity(150);
+   //chassis->moveDistance(1.6_ft);
+    chassis->driveToPoint({1.55_ft, 0_ft});
+    chassis->turnToAngle(65_deg);
+    SORT_SYS_ENABLE = true;
+    chassis->setMaxVelocity(100);
+    chassis->moveDistance(0.925_ft);
+    waitUntilPressCount(2, false, 750);
+    
+
+    chassis->moveDistance(-0.75_ft);
+    //chassis->driveToPoint({2_ft, 0_ft}, true);
+    
+}
+
+void left()
+{    
+    chassis->setMaxVelocity(150);
+    chassis->driveToPoint({1.6_ft, 0.2_ft});
+    chassis->turnToAngle(-65_deg);
+    SORT_SYS_ENABLE = true;
+    chassis->setMaxVelocity(100);
+    chassis->moveDistance(0.75_ft);
+    waitUntilPressCount(2, false, 750);
+    
+    chassis->moveDistance(-0.75_ft);
+    
+}
 
 //actually running the auton
 void runAuton()
 {
-    init();
     runningAuton = true;
-    chassis->driveToPoint({1.55_ft, -0.5_ft});
-    gyroTurn(55);
-    SORT_SYS_ENABLE = true;
-    chassis->setMaxVelocity(100);
-    chassis->moveDistance(1.1_ft);
-    waitUntilPressCount(1, false, 750);
+    init();
     
-
-    chassis->moveDistance(-0.75_ft);
-
+    
+    right();
+    /*
+    gyroTurn(-35);
+    pros::delay(1000);
+    gyroTurn(55);
+*/
     runningAuton = false;
 }

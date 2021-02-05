@@ -4,9 +4,13 @@
 void initialize()
 {
 	//init gyro
-   // imu.reset();
-   // pros::Task::delay(2000);
 	pros::lcd::initialize();
+    imu.reset();
+    while(imu.is_calibrating())
+	{
+		pros::delay(10);
+	}
+	
 	
 	pros::Task pollTask(pollSensors, "poll");
 	//IF THIS IS RED then you are on red team
