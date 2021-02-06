@@ -25,8 +25,8 @@ static void init()
     //release hood by spinning Trio.
 	topSystem.move(127);
 	rearSystem.move(127);
-	setLoaders(1);
-	pros::Task::delay(700);
+	setLoaders(0);
+	pros::Task::delay(1500);
 	topSystem.move(0);
    
 	//reverse loaders for deplyoment
@@ -325,7 +325,7 @@ void right()
     chassis->turnToAngle(65_deg);
     SORT_SYS_ENABLE = true;
     chassis->setMaxVelocity(100);
-    chassis->moveDistance(0.925_ft);
+    chassis->moveDistance(0.84_ft);
     waitUntilPressCount(2, false, 750);
     
 
@@ -340,8 +340,8 @@ void left()
     chassis->driveToPoint({1.6_ft, 0.2_ft});
     chassis->turnToAngle(-65_deg);
     SORT_SYS_ENABLE = true;
-    chassis->setMaxVelocity(100);
-    chassis->moveDistance(0.75_ft);
+    chassis->setMaxVelocity(120);
+    chassis->moveDistance(0.8_ft);
     waitUntilPressCount(2, false, 750);
     
     chassis->moveDistance(-0.75_ft);
@@ -354,8 +354,8 @@ void runAuton()
     runningAuton = true;
     init();
     
-    
-    right();
+    setLoaders(1);
+    left();
     /*
     gyroTurn(-35);
     pros::delay(1000);

@@ -17,7 +17,7 @@ pros::Distance distance_sensor(12);
 extern bool canLimit;
 
 //define the alliance color to sort the correct ball color.
-#define BLUE
+#define RED
 
 //tuning variables
 static int32_t delayEject = 500;
@@ -155,9 +155,9 @@ void sort(void* sigPass)
 				}
 			}
 		}
-		//if the alliance color ball was found the just load up
+		//if the alliance color ball was found then just load up
 		else
-		if(First_rtn.signature != 255 && First_rtn.width > 60)
+		if(First_rtn.signature != 255 && First_rtn.width > 40)
 		{
 			std::cout<<"alliance"<<std::endl;
 	
@@ -173,7 +173,7 @@ void sort(void* sigPass)
 			rearSystem.move(-mainSpeed);
 			if(getToSpeed)
 			{
-				pros::delay(200);
+				pros::delay(250);
 				topSystem.move(-mainSpeed);
 				getToSpeed = false;
 			}
@@ -184,7 +184,7 @@ void sort(void* sigPass)
 		}
 		//if the alliance ball is not detected then search for the enemy ball for discarding.
 		else
-		if(Second_rtn.signature != 255 && Second_rtn.width > 60)
+		if(Second_rtn.signature != 255 && Second_rtn.width > 40)
 		{
 			std::cout<<"enemy"<<std::endl;
 			#ifdef BLUE

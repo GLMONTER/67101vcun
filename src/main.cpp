@@ -14,7 +14,7 @@ void initialize()
 	
 	pros::Task pollTask(pollSensors, "poll");
 	//IF THIS IS RED then you are on red team
-	#define RED
+	#define BLUE
 	
 	#ifdef BLUE
 	//start the async sort task to begin sorting during driver control.
@@ -56,9 +56,11 @@ bool canLimit = false;
 static bool topToggle = false;
 static bool topPressed;
 extern void trackPosition();
+extern bool runningAuton;
 //extern void moveToPoint(const float x, const float y, const float angle);
 void opcontrol() 
 {
+	runningAuton = false;
 	/*
 	LV_IMG_DECLARE(vaquita);
 
