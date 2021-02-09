@@ -353,13 +353,10 @@ void runAuton()
 {
     runningAuton = true;
     init();
+
     
-    setLoaders(1);
-    left();
-    /*
-    gyroTurn(-35);
-    pros::delay(1000);
-    gyroTurn(55);
-*/
+    chassis->moveDistance(1_ft);
+    gyroTurn(35);
+
     runningAuton = false;
 }

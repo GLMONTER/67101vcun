@@ -1,29 +1,19 @@
 #include"sensors.hpp"
 
-//define sig indexes
-#define ALLIANCE_SIG 1
-#define ENEMEY_SIG 2
-
-//signatures generated using the vision utility	
-pros::vision_signature_s_t BLUE_SIG = pros::Vision::signature_from_utility(1, -3719, -3175, -3446, 10543, 14845, 12694, 2.700, 0);
-pros::vision_signature_s_t RED_SIG = pros::Vision::signature_from_utility(2, 7969, 10049, 9010, -447, 815, 184, 2.500, 0);
-
 //Sensor init
 pros::Optical vSensor(3);
-pros::ADIDigitalIn topLimit(8);
 pros::Distance distance_sensor(12);
 
 //bool that holds the state of the limiter
 extern bool canLimit;
 
 //define the alliance color to sort the correct ball color.
-#define BLUE
+#define RED
 
 //tuning variables
 static int32_t delayEject = 500;
 static int32_t mainSpeed = 127;
 
-int32_t topVelocity = 600;
 static int32_t minVelocity = 450;
 
 //make sure the top system can get to speed before shooting occurs
@@ -78,7 +68,9 @@ static bool canShoot()
 //The task will start at the beginning of the program with the correct ball color to start.
 void sort()
 {
+	//turn on optical LED
 	vSensor.set_led_pwm(100);
+
 	rearSystem.move(mainSpeed);
 	topSystem.move(mainSpeed);
 
@@ -88,16 +80,14 @@ void sort()
 	
 	while(true)
 	{
+		//printing for debugging
 		pros::lcd::print(1, "%f", vSensor.get_rgb().red);
 		pros::lcd::print(2, "%f", vSensor.get_rgb().blue);
-		pros::lcd::print(3, "%d", vSensor.get_proximity());
+		
         //if the sorting system is disabled then don't attemp to sort.
         if(!SORT_SYS_ENABLE)
             continue;
 	
-		//get the largest object(0), based on the signature passed in.
-		pros::vision_object_s_t First_rtn;
-		pros::vision_object_s_t Second_rtn;
 		if(!controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2) && !runningAuton)
 		{
 			std::cout<<runningAuton<<std::endl;
