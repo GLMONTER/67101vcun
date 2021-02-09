@@ -1,4 +1,1 @@
-both 2 pointers
-do 3 tower for calvin, PUSH AGAINST WALL
-
-homerow
+topSystem is 3 drump

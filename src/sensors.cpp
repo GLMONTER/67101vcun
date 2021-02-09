@@ -9,7 +9,7 @@ pros::vision_signature_s_t BLUE_SIG = pros::Vision::signature_from_utility(1, -3
 pros::vision_signature_s_t RED_SIG = pros::Vision::signature_from_utility(2, 7969, 10049, 9010, -447, 815, 184, 2.500, 0);
 
 //Sensor init
-pros::Vision vSensor(3, pros::E_VISION_ZERO_CENTER);
+pros::Optical vSensor(3);
 pros::ADIDigitalIn topLimit(8);
 pros::Distance distance_sensor(12);
 
@@ -17,7 +17,7 @@ pros::Distance distance_sensor(12);
 extern bool canLimit;
 
 //define the alliance color to sort the correct ball color.
-#define RED
+#define BLUE
 
 //tuning variables
 static int32_t delayEject = 500;
@@ -76,21 +76,11 @@ static bool canShoot()
 }
 //this function will sort the balls based on the color signature passed in. 
 //The task will start at the beginning of the program with the correct ball color to start.
-void sort(void* sigPass)
+void sort()
 {
+	vSensor.set_led_pwm(100);
 	rearSystem.move(mainSpeed);
 	topSystem.move(mainSpeed);
-    pros::vision_signature_s_t sig =  *reinterpret_cast<pros::vision_signature_s_t*>(sigPass);
-	//resetting vision sensor LED color.
-	vSensor.clear_led();
-
-	//set the red and blue signatures to be referenced later.
-	vSensor.set_signature(ALLIANCE_SIG, &sig);
-	#ifdef RED
-	vSensor.set_signature(ENEMEY_SIG, &RED_SIG);
-	#else
-	vSensor.set_signature(ENEMEY_SIG, &BLUE_SIG);
-	#endif
 
 	//set loader brake modes to lock so the alliance ball can stop at the top of the loader
 	topSystem.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
@@ -98,13 +88,16 @@ void sort(void* sigPass)
 	
 	while(true)
 	{
+		pros::lcd::print(1, "%f", vSensor.get_rgb().red);
+		pros::lcd::print(2, "%f", vSensor.get_rgb().blue);
+		pros::lcd::print(3, "%d", vSensor.get_proximity());
         //if the sorting system is disabled then don't attemp to sort.
         if(!SORT_SYS_ENABLE)
             continue;
 	
 		//get the largest object(0), based on the signature passed in.
-		pros::vision_object_s_t First_rtn = vSensor.get_by_sig(0, ALLIANCE_SIG);
-		pros::vision_object_s_t Second_rtn = vSensor.get_by_sig(0, ENEMEY_SIG);
+		pros::vision_object_s_t First_rtn;
+		pros::vision_object_s_t Second_rtn;
 		if(!controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2) && !runningAuton)
 		{
 			std::cout<<runningAuton<<std::endl;
@@ -122,42 +115,15 @@ void sort(void* sigPass)
 			rearSystem.move_velocity(0);
 			topSystem.move_velocity(0);
 			getToSpeed = true;
+			pros::delay(10);
 			continue;
 		}
 
         /*255 returns if no objects of stated signature is found.*/
 
-		//if both sigs are found then sort based on color and positioning
-		if(Second_rtn.signature != 255 && First_rtn.signature != 255 && First_rtn.width > 15 && Second_rtn.width > 15)
-		{
-			if(!canLimit && runningAuton)
-			{
-				topSystem.move(-mainSpeed);
-			}
-			std::cout<<"both"<<std::endl;
-			
-			if(First_rtn.y_middle_coord > Second_rtn.y_middle_coord)
-			{
-				vSensor.set_led(COLOR_GREEN);
-				if(!disableTop && controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
-					topSystem.move(-mainSpeed);
-				if(!disableBottom)
-					rearSystem.move(mainSpeed);
-			}
-			else
-			{
-				vSensor.set_led(COLOR_GREEN);
-				if(!disableTop && controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
-					topSystem.move(mainSpeed);
-				if(!disableBottom)
-				{
-					rearSystem.move(mainSpeed);
-				}
-			}
-		}
 		//if the alliance color ball was found then just load up
 		else
-		if(First_rtn.signature != 255 && First_rtn.width > 40)
+		if(vSensor.get_rgb().red > 1000)
 		{
 			std::cout<<"alliance"<<std::endl;
 	
@@ -165,12 +131,13 @@ void sort(void* sigPass)
 			{
 				topSystem.move(-mainSpeed);
 			}
-			#ifdef BLUE
-			vSensor.set_led(COLOR_BLUE);
-			#else
-			vSensor.set_led(COLOR_RED);
-			#endif
+			#ifdef RED
 			rearSystem.move(-mainSpeed);
+			#else
+			rearSystem.move(mainSpeed);
+			#endif
+			
+			#ifdef RED
 			if(getToSpeed)
 			{
 				pros::delay(250);
@@ -181,26 +148,43 @@ void sort(void* sigPass)
 			{
 				topSystem.move(-mainSpeed);
 			}
+			#else
+			topSystem.move(-mainSpeed);
+			pros::delay(delayEject);
+			#endif
 		}
 		//if the alliance ball is not detected then search for the enemy ball for discarding.
 		else
-		if(Second_rtn.signature != 255 && Second_rtn.width > 40)
+		if(vSensor.get_rgb().blue > 1000)
 		{
 			std::cout<<"enemy"<<std::endl;
-			#ifdef BLUE
-			vSensor.set_led(COLOR_RED);
-			#else
-			vSensor.set_led(COLOR_BLUE);
-			#endif
-			topSystem.move(-127);
+			#ifdef RED
 			if(!disableBottom)
 				rearSystem.move(mainSpeed);
+			#else
+			if(!disableBottom)
+				rearSystem.move(-mainSpeed);
+			#endif
+			#ifdef BLUE
+			if(getToSpeed)
+			{
+				pros::delay(250);
+				topSystem.move(-mainSpeed);
+				getToSpeed = false;
+			}
+			else
+			{
+				topSystem.move(-mainSpeed);
+			}
+			#else
+			topSystem.move(-mainSpeed);
 			pros::delay(delayEject);
+			#endif
+			
 		}
 		//if nothing was found then just load like normal
 		else
 		{
-			vSensor.set_led(COLOR_LIGHT_CORAL);
 			topSystem.move(-mainSpeed);
 			rearSystem.move(-mainSpeed);
 		}

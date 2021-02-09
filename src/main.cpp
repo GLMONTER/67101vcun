@@ -11,18 +11,10 @@ void initialize()
 		pros::delay(10);
 	}
 	
-	
 	pros::Task pollTask(pollSensors, "poll");
-	//IF THIS IS RED then you are on red team
-	#define BLUE
 	
-	#ifdef BLUE
 	//start the async sort task to begin sorting during driver control.
-	pros::Task sortTask(sort, reinterpret_cast<void*>(&BLUE_SIG),"vision");
-	#endif
-	#ifdef RED
-	pros::Task sortTask(sort, reinterpret_cast<void*>(&RED_SIG), "vision");
-	#endif
+	pros::Task sortTask(sort);
 }
 
 void disabled()

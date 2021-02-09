@@ -122,10 +122,10 @@ std::shared_ptr<OdomChassisController> chassis =
     // left encoder in ADI ports A & B, right encoder in ADI ports C & D (reversed)
  .withSensors(
         ADIEncoder{'C', 'D', false}, // left encoder in ADI ports A & B
-        ADIEncoder{'E', 'F', false}, // right encoder in ADI ports C & D (reversed)
-        ADIEncoder{'A', 'B', false}  // middle encoder in ADI ports E & F
+        ADIEncoder{'E', 'F', false} // right encoder in ADI ports C & D (reversed)
     )    // specify the tracking wheels diameter (2.75 in), track (7 in), and TPR (360)
-        .withOdometry({{2.783_in, 15.25_in, 7.5_in, 2.783_in}, quadEncoderTPR}, StateMode::FRAME_TRANSFORMATION)
+    .withDimensions(AbstractMotor::gearset::green, {{2.75_in, 15_in}, quadEncoderTPR})
+        .withOdometry()
     .buildOdometry();
 
 /*
