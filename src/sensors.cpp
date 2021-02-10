@@ -113,7 +113,7 @@ void sort()
 
 		//if the alliance color ball was found then just load up
 		else
-		if(vSensor.get_rgb().red > 1000)
+		if((vSensor.get_rgb().red / vSensor.get_rgb().blue) > 2)
 		{
 			std::cout<<"alliance"<<std::endl;
 	
@@ -145,7 +145,7 @@ void sort()
 		}
 		//if the alliance ball is not detected then search for the enemy ball for discarding.
 		else
-		if(vSensor.get_rgb().blue > 1000)
+		if((vSensor.get_rgb().blue / vSensor.get_rgb().red) > 2)
 		{
 			std::cout<<"enemy"<<std::endl;
 			#ifdef RED
