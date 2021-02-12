@@ -167,7 +167,7 @@ void opcontrol()
 			rightLoader.move(0);
 			leftLoader.move(0);
 		}
-
+		
 		pros::delay(10);
 	}
 }

@@ -1,6 +1,5 @@
 #include"main.h"
 
-
 pros::Imu imu(21);
 
 extern pros::Distance distance_sensor;
@@ -110,10 +109,10 @@ static void gyroTurn(const float deg)
     }
     setDrive(0,0);
 }
-std::shared_ptr<OdomChassisController> chassis =
+auto chassis =
   ChassisControllerBuilder()
-    .withMotors(20, 6, 18, 10) // left motor is 1, right motor is 2 (reversed)
-    // green gearset, 4 inch wheel diameter, 11.5 inch wheelbase
+    .withMotors(20, 6, 18, 10)
+    // green gearset, 4 inch wheel diameter, 9 inch wheelbase
     .withDimensions(AbstractMotor::gearset::green, {{4_in, 9_in}, imev5GreenTPR})
     .withGains(
         {0.0015, 0.0005, 0.0001}, // Distance controller gains
@@ -121,32 +120,12 @@ std::shared_ptr<OdomChassisController> chassis =
         {0.001, 0.0005, 0.0001})  // Angle controller gains (helps drive straight)
     // left encoder in ADI ports A & B, right encoder in ADI ports C & D (reversed)
  .withSensors(
-        ADIEncoder{'C', 'D', false}, // left encoder in ADI ports A & B
-        ADIEncoder{'E', 'F', false} // right encoder in ADI ports C & D (reversed)
-    )    // specify the tracking wheels diameter (2.75 in), track (7 in), and TPR (360)
-    .withDimensions(AbstractMotor::gearset::green, {{2.75_in, 15_in}, quadEncoderTPR})
-        .withOdometry()
+        ADIEncoder{'C', 'D', false}, // left encoder in ADI ports C & D
+        ADIEncoder{'E', 'F', true} // right encoder in ADI ports E & F (reversed)
+    )    // specify the tracking wheels diameter (2.75 in), track (15 in)
+        .withOdometry({{2.75_in, 15_in}, quadEncoderTPR})
     .buildOdometry();
 
-/*
-static auto chassis = ChassisControllerBuilder()
-    .withMotors(20, 6, 18, 10) // left motor is 1, right motor is 2 (reversed)
-    // green gearset, 4 inch wheel diameter, 11.5 inch wheelbase
-    .withDimensions(AbstractMotor::gearset::green, {{4_in, 16_in}, imev5GreenTPR})
-     .withGains(
-        {0.002, 0.0005, 0.0001}, // Distance controller gains
-        {0.0025, 0.0005, 0.0001}, // Turn controller gains
-        {0.0012, 0.0005, 0.0001})  // Angle controller gains (helps drive straight)
-    .withSensors(
-        ADIEncoder{'C', 'D', false}, // left encoder in ADI ports A & B
-        ADIEncoder{'E', 'F', false},  // right encoder in ADI ports C & D (reversed)
-        ADIEncoder{'A', 'B', true}  // middle encoder in ADI ports E & F
-    )
-    // specify the tracking wheels diameter (2.75 in), track (7 in), and TPR (360)
-    // specify the middle encoder distance (1 in) and diameter (2.75 in)
-    .withOdometry({{2.75_in, 15.25_in, 6.5_in, 2.75_in}, quadEncoderTPR})
-    .buildOdometry();
-*/
 auto xModel = std::dynamic_pointer_cast<XDriveModel>(chassis->getModel());
 
 //function to see when the robot shoots a ball into the tower.
@@ -182,132 +161,7 @@ static void swingTurn(const int32_t forwardPower, const int32_t turnPower, const
     if(settle)
         pros::delay(driveSettle);
 }
-static void threeRightNew()
-{
-      topSystem.move_velocity(topVelocity);
-    //set initial chassis velocity
-    chassis->setMaxVelocity(120);
-    
-    //start lifts and sorting
-    SORT_SYS_ENABLE = true;
-    
-    setLoaders(loaderSetting::Forward);
 
-    //swing into tower and load
-   swingTurn(80, 21, 1670, 0, true);
-   
-   //chassis->moveDistance(2.05_ft);
-  // gyroTurn(72);
-  // chassis->setMaxVelocity(100);
-  // chassis->moveDistance(1.75_ft);
-   
-    waitUntilPressCount(1, true, 0);
-
-     setLoaders(1);
-    //move out 
-    chassis->moveDistance(-0.8_ft);
-    setLoaders(2);
-    gyroTurn(-60);
-    chassis->moveDistance(1_ft);
-    strafeAbstract(xModel, -100, 1400, 0);
-    setLoaders(0);
-    chassis->moveDistance(1.35_ft);
-    strafeAbstract(xModel, 100, 600, 0);
-    
-    gyroTurn(-20);
-    chassis->setMaxVelocity(80);
-    chassis->moveDistance(1_ft);
-    gyroTurn(-5);
-    waitUntilPressCount(3, true, 0);
-    chassis->moveDistance(-1_ft);
-    
-}
-static void threeRight()
-{
-    topSystem.move_velocity(topVelocity);
-    //set initial chassis velocity
-    chassis->setMaxVelocity(130);
-    
-    //start lifts and sorting
-    SORT_SYS_ENABLE = true;
-    
-    setLoaders(loaderSetting::Forward);
-
-    //swing into tower and load
-   //swingTurn(80, 21, 1670, 0, true);
-   chassis->moveDistance(1.8_ft);
-   gyroTurn(66);
-   chassis->setMaxVelocity(110);
-   chassis->moveDistance(1.8_ft);
-    waitUntilPressCount(1, true,0);
-
-     
-    //move out 
-    chassis->moveDistance(-0.8_ft);
-    setLoaders(2);
-    gyroTurn(-40);
-    chassis->setMaxVelocity(100);
-    setLoaders(0);
-    chassis->moveDistance(2_ft);
-    gyroTurn(-35);
-    chassis->moveDistance(0.75_ft);
-    waitUntilPressCount(3, false, 0);
-    chassis->moveDistance(-1_ft);
-
-}
-static void twoLeft()
-{
-    chassis->setMaxVelocity(130);
-
-    //start lifts and sorting
-    SORT_SYS_ENABLE = true;
-    canLimit = false;
-    setLoaders(loaderSetting::Forward);
-  
-    chassis->driveToPoint({2.45_ft, 0.25_ft});
-  
-    chassis->turnAngle(-108_deg);
-    chassis->setMaxVelocity(65);
-    chassis->moveDistance(1.2_ft);
-
-    //swing into tower
-    pros::delay(2000);
-    chassis->setMaxVelocity(140);
-    chassis->moveDistance(-1_ft);
-}
-
-static void newHomeRow()
-{
-    //set initial velocity
-    chassis->setMaxVelocity(130);
-    
-    //start lifts and sorting
-    SORT_SYS_ENABLE = true;
-    canLimit = false;
-    setLoaders(loaderSetting::Forward);
-
-    //swing into tower and load
-    swingTurn(80, 20, 1650, 600, true);
-    pros::Task::delay(700);
-     
-    //back out and eject alliance ball
-    chassis->moveDistance(-3.25_ft);
-    setLoaders(loaderSetting::Forward);
-    pros::delay(750);
-    
-    //turn towards last tower
-    chassis->setMaxVelocity(130);
-    chassis->turnAngle(250_deg);
-    chassis->setMaxVelocity(125);
-    chassis->moveDistance(2.75_ft);
-    gyroTurn(-179);
-    
-    //go towards tower, load, and leave.
-    chassis->setMaxVelocity(80);
-    chassis->moveDistance(1.6_ft);
-    pros::delay(1500);
-    chassis->moveDistance(-2_ft);
-}
 std::shared_ptr<AsyncMotionProfileController> profileController =
   AsyncMotionProfileControllerBuilder()
     .withLimits({
@@ -328,7 +182,6 @@ void right()
     chassis->moveDistance(1.5_ft);
     waitUntilPressCount(2, false, 0);
     
-
     chassis->moveDistance(-0.75_ft);
     //chassis->driveToPoint({2_ft, 0_ft}, true);
     
@@ -348,6 +201,21 @@ void left()
     
 }
 */
+void Skills()
+{
+    chassis->setMaxVelocity(120);
+    profileController->generatePath({
+  {0_ft, 0_ft, 0_deg},  // Profile starting position, this will normally be (0, 0, 0)
+  {3_ft, 0_ft, 0_deg},
+  {4_ft, -0.5_ft, -15_deg},
+  }, // The next point in the profile, 3 feet forward
+  "A" // Profile name
+);
+profileController->setTarget("A");
+profileController->waitUntilSettled();
+chassis->turnAngle(-55_deg);
+}
+
 //actually running the auton
 void runAuton()
 {
@@ -355,7 +223,7 @@ void runAuton()
     init();
     setLoaders(1);
     
-    right();
+    Skills();
 
     runningAuton = false;
 }
