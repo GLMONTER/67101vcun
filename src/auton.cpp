@@ -116,7 +116,7 @@ std::shared_ptr<OdomChassisController> chassis =
     // green gearset, 4 inch wheel diameter, 11.5 inch wheelbase
     .withDimensions(AbstractMotor::gearset::green, {{4_in, 9_in}, imev5GreenTPR})
     .withGains(
-        {0.0018, 0.0005, 0.0001}, // Distance controller gains
+        {0.0015, 0.0005, 0.0001}, // Distance controller gains
         {0.0025, 0.0005, 0.0001}, // Turn controller gains
         {0.001, 0.0005, 0.0001})  // Angle controller gains (helps drive straight)
     // left encoder in ADI ports A & B, right encoder in ADI ports C & D (reversed)
@@ -321,19 +321,19 @@ void right()
 {    
     chassis->setMaxVelocity(150);
    //chassis->moveDistance(1.6_ft);
-    chassis->driveToPoint({1.55_ft, 0_ft});
+    chassis->driveToPoint({2.75_ft, -0.5_ft});
     chassis->turnToAngle(65_deg);
     SORT_SYS_ENABLE = true;
-    chassis->setMaxVelocity(100);
-    chassis->moveDistance(0.84_ft);
-    waitUntilPressCount(2, false, 750);
+    chassis->setMaxVelocity(80);
+    chassis->moveDistance(1.5_ft);
+    waitUntilPressCount(2, false, 0);
     
 
     chassis->moveDistance(-0.75_ft);
     //chassis->driveToPoint({2_ft, 0_ft}, true);
     
 }
-
+/*
 void left()
 {    
     chassis->setMaxVelocity(150);
@@ -342,21 +342,20 @@ void left()
     SORT_SYS_ENABLE = true;
     chassis->setMaxVelocity(120);
     chassis->moveDistance(0.8_ft);
-    waitUntilPressCount(2, false, 750);
+    waitUntilPressCount(1, false, 750);
     
     chassis->moveDistance(-0.75_ft);
     
 }
-
+*/
 //actually running the auton
 void runAuton()
 {
     runningAuton = true;
     init();
-
+    setLoaders(1);
     
-    chassis->moveDistance(1_ft);
-    gyroTurn(35);
+    right();
 
     runningAuton = false;
 }
