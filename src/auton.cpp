@@ -109,10 +109,10 @@ static void gyroTurn(const float deg)
     }
     setDrive(0,0);
 }
-auto chassis =
+std::shared_ptr<OdomChassisController> chassis =
   ChassisControllerBuilder()
-    .withMotors(20, 6, 18, 10)
-    // green gearset, 4 inch wheel diameter, 9 inch wheelbase
+    .withMotors(20, 6, 18, 10) // left motor is 1, right motor is 2 (reversed)
+    // green gearset, 4 inch wheel diameter, 11.5 inch wheelbase
     .withDimensions(AbstractMotor::gearset::green, {{4_in, 9_in}, imev5GreenTPR})
     .withGains(
         {0.0015, 0.0005, 0.0001}, // Distance controller gains
@@ -120,11 +120,12 @@ auto chassis =
         {0.001, 0.0005, 0.0001})  // Angle controller gains (helps drive straight)
     // left encoder in ADI ports A & B, right encoder in ADI ports C & D (reversed)
  .withSensors(
-        ADIEncoder{'C', 'D', false}, // left encoder in ADI ports C & D
-        ADIEncoder{'E', 'F', true} // right encoder in ADI ports E & F (reversed)
-    )    // specify the tracking wheels diameter (2.75 in), track (15 in)
-        .withOdometry({{2.75_in, 15_in}, quadEncoderTPR})
-    .buildOdometry();
+        ADIEncoder{'C', 'D', false}, // left encoder in ADI ports A & B
+        ADIEncoder{'E', 'F', false} // right encoder in ADI ports C & D (reversed)
+    )    // specify the tracking wheels diameter (2.75 in), track (7 in), and TPR (360)
+    
+.withOdometry({{2.75_in, 15_in}, quadEncoderTPR}, StateMode::FRAME_TRANSFORMATION)    
+.buildOdometry();
 
 auto xModel = std::dynamic_pointer_cast<XDriveModel>(chassis->getModel());
 
@@ -203,17 +204,30 @@ void left()
 */
 void Skills()
 {
-    chassis->setMaxVelocity(120);
-    profileController->generatePath({
-  {0_ft, 0_ft, 0_deg},  // Profile starting position, this will normally be (0, 0, 0)
-  {3_ft, 0_ft, 0_deg},
-  {4_ft, -0.5_ft, -15_deg},
-  }, // The next point in the profile, 3 feet forward
-  "A" // Profile name
-);
-profileController->setTarget("A");
-profileController->waitUntilSettled();
-chassis->turnAngle(-55_deg);
+    chassis->setMaxVelocity(90);
+    canLimit = true;
+    chassis->driveToPoint({3_ft, 0_ft}, false);
+    
+    gyroTurn(-58);
+    chassis->setMaxVelocity(125);
+
+    chassis->driveToPoint({3.1_ft, -1.6_ft}, false);
+
+    SORT_SYS_ENABLE = false;
+    rearSystem.move(-127);
+    pros::delay(250);
+    SORT_SYS_ENABLE = true;
+    canLimit = false;
+    pros::delay(500);
+    chassis->driveToPoint({2.25_ft, 0.9_ft}, true);
+    canLimit = true;
+    chassis->turnToAngle(-37_deg);
+    chassis->driveToPoint({4.15_ft, -0.3_ft}, false);
+    chassis->setState({0_in, 0_in, 0_deg});
+    chassis->driveToPoint({-1.5_ft, 2.75_ft}, true);
+
+    pros::delay(10000);
+
 }
 
 //actually running the auton
@@ -222,7 +236,6 @@ void runAuton()
     runningAuton = true;
     init();
     setLoaders(1);
-    
     Skills();
 
     runningAuton = false;

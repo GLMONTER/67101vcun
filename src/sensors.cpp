@@ -8,10 +8,10 @@ pros::Distance distance_sensor(12);
 extern bool canLimit;
 
 //define the alliance color to sort the correct ball color.
-#define RED
+#define BLUE
 
 //tuning variables
-static int32_t delayEject = 500;
+static int32_t delayEject = 400;
 static int32_t mainSpeed = 127;
 
 static int32_t minVelocity = 450;
@@ -86,19 +86,27 @@ void sort()
         //if the sorting system is disabled then don't attemp to sort.
         if(!SORT_SYS_ENABLE)
             continue;
-	
+
 		if(!controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2) && !runningAuton)
 		{
 			std::cout<<runningAuton<<std::endl;
 			canLimit = true;
-			mainSpeed = 80;
+			mainSpeed = 95;
 		}
 		else if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2) && !runningAuton)
 		{
 			canLimit = false;
 			mainSpeed = 127;
 		}
-		
+		if(runningAuton && canLimit)
+		{
+			mainSpeed = 95;
+		}
+		if(runningAuton && !canLimit)
+		{
+			mainSpeed = 127;
+		}
+
 		if(seeBall() && canLimit)
 		{
 			rearSystem.move_velocity(0);
