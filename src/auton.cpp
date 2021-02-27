@@ -86,7 +86,7 @@ static void gyroTurn(const float deg)
     float value = 0.0;
 
     float target = deg;
-    float Ki = -0.0015;
+    float Ki = -0.006;
     float Kd = -0.6;
     float Kp = -4.5;
 
@@ -116,7 +116,7 @@ std::shared_ptr<OdomChassisController> chassis =
     .withDimensions(AbstractMotor::gearset::green, {{4_in, 9_in}, imev5GreenTPR})
     .withGains(
         {0.0015, 0.0005, 0.0001}, // Distance controller gains
-        {0.0025, 0.0005, 0.0001}, // Turn controller gains
+        {0.002, 0.00025, 0.0001}, // Turn controller gains
         {0.001, 0.0005, 0.0001})  // Angle controller gains (helps drive straight)
     // left encoder in ADI ports A & B, right encoder in ADI ports C & D (reversed)
  .withSensors(
@@ -172,46 +172,50 @@ std::shared_ptr<AsyncMotionProfileController> profileController =
     })
     .withOutput(chassis)
     .buildMotionProfileController();
-void right()
+void home()
 {    
-    chassis->setMaxVelocity(150);
-   //chassis->moveDistance(1.6_ft);
-    chassis->driveToPoint({2.75_ft, -0.5_ft});
-    chassis->turnToAngle(65_deg);
-    SORT_SYS_ENABLE = true;
-    chassis->setMaxVelocity(80);
-    chassis->moveDistance(1.5_ft);
+
+    swingTurn(100, -20, 1000, 0, false);
+    swingTurn(100, -30, 400, 0, false);
+
     waitUntilPressCount(2, false, 0);
-    
-    chassis->moveDistance(-0.75_ft);
-    //chassis->driveToPoint({2_ft, 0_ft}, true);
-    
-}
-/*
-void left()
-{    
     chassis->setMaxVelocity(150);
-    chassis->driveToPoint({1.6_ft, 0.2_ft});
-    chassis->turnToAngle(-65_deg);
-    SORT_SYS_ENABLE = true;
-    chassis->setMaxVelocity(120);
-    chassis->moveDistance(0.8_ft);
-    waitUntilPressCount(1, false, 750);
-    
-    chassis->moveDistance(-0.75_ft);
-    
+    chassis->driveToPoint({0.5_ft, 1.75_ft}, true);
+    chassis->turnToAngle(145_deg);
+    chassis->setState({0_ft, 0_ft, 0_deg});
+    chassis->driveToPoint({5.35_ft, -0.5_ft}, false);
+    waitUntilPressCount(5, false, 0);
+
 }
-*/
+void left()
+{
+    swingTurn(100, 20, 1000, 0, false);
+    swingTurn(100, 30, 400, 0, false);
+
+    waitUntilPressCount(2, false, 0);
+    chassis->setMaxVelocity(150);
+    chassis->moveDistance(-1_ft);
+}
+void right()
+{
+    swingTurn(100, -20, 1000, 0, false);
+    swingTurn(100, -30, 400, 0, false);
+
+    waitUntilPressCount(2, false, 0);
+    chassis->setMaxVelocity(150);
+    chassis->moveDistance(-1_ft);
+
+}
 void Skills()
 {
-    chassis->setMaxVelocity(90);
+      chassis->setMaxVelocity(90);
     canLimit = true;
     chassis->driveToPoint({3_ft, 0_ft}, false);
-    
-    gyroTurn(-58);
+
+    gyroTurn(-60);
     chassis->setMaxVelocity(125);
 
-    chassis->driveToPoint({3.1_ft, -1.6_ft}, false);
+    chassis->driveToPoint({3.05_ft, -1.6_ft}, false);
 
     SORT_SYS_ENABLE = false;
     rearSystem.move(-127);
@@ -222,10 +226,20 @@ void Skills()
     chassis->driveToPoint({2.25_ft, 0.9_ft}, true);
     canLimit = true;
     chassis->turnToAngle(-37_deg);
-    chassis->driveToPoint({4.15_ft, -0.3_ft}, false);
+    chassis->driveToPoint({3.5_ft, -0.3_ft}, false);
+   // gyroTurn(-37);
+
+    chassis->driveToPoint({3.9_ft, -0.45_ft}, false);
     chassis->setState({0_in, 0_in, 0_deg});
     chassis->driveToPoint({-1.5_ft, 2.75_ft}, true);
-
+    gyroTurn(-15);
+    chassis->driveToPoint({-0.25_ft, 2.75_ft}, false);
+    gyroTurn(-20);
+    rearSystem.move(-127);
+    pros::delay(250);
+    SORT_SYS_ENABLE = true;
+    canLimit = false;
+  
     pros::delay(10000);
 
 }
@@ -236,7 +250,7 @@ void runAuton()
     runningAuton = true;
     init();
     setLoaders(1);
-    Skills();
+    right();
 
     runningAuton = false;
 }

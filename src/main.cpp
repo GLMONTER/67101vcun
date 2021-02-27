@@ -6,10 +6,7 @@ void initialize()
 	//init gyro
 	pros::lcd::initialize();
     imu.reset();
-    while(imu.is_calibrating())
-	{
-		pros::delay(10);
-	}
+    pros::delay(2000);
 	
 	pros::Task pollTask(pollSensors, "poll");
 	
