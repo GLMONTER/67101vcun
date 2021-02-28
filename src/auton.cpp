@@ -187,7 +187,7 @@ void home()
     waitUntilPressCount(5, false, 0);
 
 }
-void left()
+void right()
 {
     swingTurn(100, 20, 1000, 0, false);
     swingTurn(100, 30, 400, 0, false);
@@ -196,7 +196,7 @@ void left()
     chassis->setMaxVelocity(150);
     chassis->moveDistance(-1_ft);
 }
-void right()
+void left()
 {
     swingTurn(100, -20, 1000, 0, false);
     swingTurn(100, -30, 400, 0, false);
@@ -250,7 +250,7 @@ void runAuton()
     runningAuton = true;
     init();
     setLoaders(1);
-    right();
+    home();
 
     runningAuton = false;
 }
