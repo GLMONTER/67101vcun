@@ -2,8 +2,8 @@
 
 pros::Imu imu(21);
 
+//for checking presence of ball
 extern pros::Distance distance_sensor;
-extern pros::ADIDigitalIn topLimit;
 
 extern bool SORT_SYS_ENABLE;
 extern bool canLimit;
@@ -12,23 +12,24 @@ extern bool disableTop;
 extern bool disableBottom;
 extern int32_t topVelocity;
 
+//pre-defind loading settings for easier understanding
 enum loaderSetting
 {
     Forward = 0,
     Backward = 1,
     Disabled = 2
 };
+
 static void init()
 {
    
     //release hood by spinning Trio.
 	topSystem.move(127);
 	rearSystem.move(127);
+    //intake loaders
 	setLoaders(0);
 	pros::Task::delay(1500);
 	topSystem.move(0);
-   
-	//reverse loaders for deplyoment
 }
 
 bool runningAuton = false;
@@ -129,18 +130,6 @@ std::shared_ptr<OdomChassisController> chassis =
 
 auto xModel = std::dynamic_pointer_cast<XDriveModel>(chassis->getModel());
 
-//function to see when the robot shoots a ball into the tower.
-static void waitUntilShoot(const uint32_t timeAfterShoot)
-{
-    //wait until the limit switch is pressed
-    while(!topLimit.get_value())
-    {
-        pros::delay(10);
-    }
-    //delay doing anything until the ball is completely out of the robot.
-    pros::delay(timeAfterShoot);
-}
-
 static void strafeAbstract(std::shared_ptr<okapi::XDriveModel>& model, double velocityPower, const uint32_t timeToStrafe, const uint32_t timeToSettle)
 {
     //use the chassis model to strafe for a certain amount of time, then stop.
@@ -196,6 +185,36 @@ void right()
     chassis->setMaxVelocity(150);
     chassis->moveDistance(-1_ft);
 }
+
+void rightElim()
+{
+    swingTurn(100, 18, 1000, 0, false);
+    swingTurn(100, 28, 400, 0, false);
+
+    waitUntilPressCount(1, true, 0);
+    chassis->setMaxVelocity(150);
+    setDrive(-127, -127);
+    pros::delay(500);
+    setDrive(0, 0);
+    gyroTurn(-55);
+    xModel->strafe(60);
+    pros::delay(1000);
+    xModel->stop();
+    gyroTurn(-55);
+    setLoaders(loaderSetting::Backward);
+    setDrive(100, 100);
+    pros::delay(900);
+    setDrive(50, 50);
+    pros::delay(300);
+    setDrive(0, 0);
+    gyroTurn(-45);
+
+    canLimit = false;
+
+
+
+
+}
 void left()
 {
     swingTurn(100, -20, 1000, 0, false);
@@ -250,7 +269,7 @@ void runAuton()
     runningAuton = true;
     init();
     setLoaders(1);
-    home();
+    rightElim();
 
     runningAuton = false;
 }

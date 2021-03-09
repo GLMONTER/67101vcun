@@ -28,25 +28,33 @@ void pollSensors()
 {
 	while(true)
 	{
+		//wait for ball to come into view
 		while(distance_sensor.get() > 100)
 		{
 			pros::delay(10);
 			continue;
 		}
+		//give time to shoot if needed
 		pros::delay(100);
+		//wait for ball to leave view
 		while(distance_sensor.get() < 100)
 		{
 			pros::delay(10);
 			continue;
 		}
+		//add to the amount of balls that passed through
 		limitPresses++;
+		//print new value
 		pros::lcd::print(4, "%d", limitPresses);
 	}
 }
-
+//flags to disable certain drums.
 bool disableTop = false;
 bool disableBottom = false;
+//extern flag to check if auton is running. 
 extern bool runningAuton;
+
+//simply checking if ball in view
 static bool seeBall()
 {
 	if(distance_sensor.get() < 50)
@@ -55,21 +63,14 @@ static bool seeBall()
 	}
 	return false;
 }
-static bool canShoot()
-{
-	if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2) && topSystem.get_actual_velocity() > minVelocity)
-	{
-		return true;
-	}
-	return false;
-}
-//this function will sort the balls based on the color signature passed in. 
-//The task will start at the beginning of the program with the correct ball color to start.
+
+//a multithreaded task that starts in init() that controls the drums based on optical sensor input
 void sort()
 {
 	//turn on optical LED
 	vSensor.set_led_pwm(100);
 
+	//have to initially
 	rearSystem.move(mainSpeed);
 	topSystem.move(mainSpeed);
 
@@ -89,9 +90,8 @@ void sort()
 
 		if(!controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2) && !runningAuton)
 		{
-			std::cout<<runningAuton<<std::endl;
 			canLimit = true;
-			mainSpeed = 95;
+			mainSpeed = 85;
 		}
 		else if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2) && !runningAuton)
 		{
@@ -100,13 +100,13 @@ void sort()
 		}
 		if(runningAuton && canLimit)
 		{
-			mainSpeed = 95;
+			mainSpeed = 85;
 		}
 		if(runningAuton && !canLimit)
 		{
 			mainSpeed = 127;
 		}
-
+		//hold the ball in position if not wanting to shoot
 		if(seeBall() && canLimit)
 		{
 			rearSystem.move_velocity(0);
@@ -116,14 +116,10 @@ void sort()
 			continue;
 		}
 
-        /*255 returns if no objects of stated signature is found.*/
-
-		//if the alliance color ball was found then just load up
+        //check if a red ball is found and respond accordingly based on alliance color
 		else
 		if((vSensor.get_rgb().red / vSensor.get_rgb().blue) > 2)
-		{
-			std::cout<<"alliance"<<std::endl;
-	
+		{	
 			if(!canLimit && runningAuton)
 			{
 				topSystem.move(-mainSpeed);
@@ -150,11 +146,10 @@ void sort()
 			pros::delay(delayEject);
 			#endif
 		}
-		//if the alliance ball is not detected then search for the enemy ball for discarding.
+        //check if a blue ball is found and respond accordingly based on alliance color
 		else
 		if((vSensor.get_rgb().blue / vSensor.get_rgb().red) > 2)
 		{
-			std::cout<<"enemy"<<std::endl;
 			#ifdef RED
 			if(!disableBottom)
 				rearSystem.move(mainSpeed);
