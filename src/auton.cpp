@@ -1,9 +1,13 @@
 #include"main.h"
 
 pros::Imu imu(21);
+#define RED
 
 //for checking presence of ball
 extern pros::Distance distance_sensor;
+
+extern bool redPassed;
+extern bool bluePassed;
 
 extern bool SORT_SYS_ENABLE;
 extern bool canLimit;
@@ -20,7 +24,7 @@ enum loaderSetting
     Disabled = 2
 };
 
-static void init()
+void init()
 {
    
     //release hood by spinning Trio.
@@ -33,7 +37,14 @@ static void init()
 }
 
 bool runningAuton = false;
+static void strafeAb(int istrafeSpeed)
+{
+    leftFront.move(istrafeSpeed);
+    leftBack.move(-istrafeSpeed);
 
+    rightFront.move(-istrafeSpeed);
+    rightBack.move(istrafeSpeed);
+}
 //wait until a certain number of balls have gone through
 static void waitUntilPressCount(const unsigned int pressCount, const bool waitUntilHold, const unsigned int delayUntilHold)
 {
@@ -115,10 +126,7 @@ std::shared_ptr<OdomChassisController> chassis =
     .withMotors(20, 6, 18, 10) // left motor is 1, right motor is 2 (reversed)
     // green gearset, 4 inch wheel diameter, 11.5 inch wheelbase
     .withDimensions(AbstractMotor::gearset::green, {{4_in, 9_in}, imev5GreenTPR})
-    .withGains(
-        {0.0015, 0.0005, 0.0001}, // Distance controller gains
-        {0.002, 0.00025, 0.0001}, // Turn controller gains
-        {0.001, 0.0005, 0.0001})  // Angle controller gains (helps drive straight)
+    
     // left encoder in ADI ports A & B, right encoder in ADI ports C & D (reversed)
  .withSensors(
         ADIEncoder{'C', 'D', false}, // left encoder in ADI ports A & B
@@ -163,16 +171,17 @@ std::shared_ptr<AsyncMotionProfileController> profileController =
     .buildMotionProfileController();
 void home()
 {    
-
+   
     swingTurn(100, -20, 1000, 0, false);
     swingTurn(100, -30, 400, 0, false);
 
     waitUntilPressCount(2, false, 0);
     chassis->setMaxVelocity(150);
-    chassis->driveToPoint({0.5_ft, 1.75_ft}, true);
-    chassis->turnToAngle(145_deg);
-    chassis->setState({0_ft, 0_ft, 0_deg});
-    chassis->driveToPoint({5.35_ft, -0.5_ft}, false);
+    chassis->driveToPoint({2_ft, 0.5_ft}, true);
+    
+    
+    chassis->driveToPoint({4_ft, -3_ft}, true);
+    
     waitUntilPressCount(5, false, 0);
 
 }
@@ -189,25 +198,34 @@ void right()
 void rightElim()
 {
     swingTurn(100, 18, 1000, 0, false);
-    swingTurn(100, 28, 400, 0, false);
+    swingTurn(100, 42, 400, 0, false);
 
     waitUntilPressCount(1, true, 0);
     chassis->setMaxVelocity(150);
     setDrive(-127, -127);
     pros::delay(500);
     setDrive(0, 0);
-    gyroTurn(-55);
-    xModel->strafe(60);
-    pros::delay(1000);
-    xModel->stop();
-    gyroTurn(-55);
+    gyroTurn(-45);
+
+    strafeAb(50);
+    pros::delay(1300);
+    setDrive(0,0);
+
+    strafeAb(-25);
+    pros::delay(400);
+    setDrive(0,0);
+
     setLoaders(loaderSetting::Backward);
+    /*
     setDrive(100, 100);
     pros::delay(900);
     setDrive(50, 50);
     pros::delay(300);
     setDrive(0, 0);
-    gyroTurn(-45);
+    */
+   chassis->setMaxVelocity(125);
+   chassis->moveDistance(1.5_ft);
+    gyroTurn(-36);
 
     canLimit = false;
 
@@ -220,8 +238,29 @@ void left()
     swingTurn(100, -20, 1000, 0, false);
     swingTurn(100, -30, 400, 0, false);
 
-    waitUntilPressCount(2, false, 0);
+    //waitUntilPressCount(2, false, 0);
+    while(limitPresses < 2)
+    {
+        pros::delay(10);
+    }
+    pros::delay(200);
+    setDrive(-60, -60);
+    pros::delay(500);
+    SORT_SYS_ENABLE  =false;
+    topSystem.move(127);
+    setDrive(60, 60);
+    pros::delay(500);
+    setDrive(0, 0);
+
+     pros::delay(1000);
+    setLoaders(loaderSetting::Backward);
+
+    setDrive(-60, -60);
+    pros::delay(500);
+    setDrive(0,0);
+
     chassis->setMaxVelocity(150);
+    
     chassis->moveDistance(-1_ft);
 
 }
@@ -268,8 +307,8 @@ void runAuton()
 {
     runningAuton = true;
     init();
-    setLoaders(1);
-    rightElim();
+    setLoaders(loaderSetting::Forward);
+    left();
 
     runningAuton = false;
 }

@@ -9,7 +9,8 @@ extern bool canLimit;
 
 //define the alliance color to sort the correct ball color.
 #define RED
-
+bool redPassed = false;
+bool bluePassed = false;
 //tuning variables
 static int32_t delayEject = 400;
 static int32_t mainSpeed = 127;
@@ -118,8 +119,9 @@ void sort()
 
         //check if a red ball is found and respond accordingly based on alliance color
 		else
-		if((vSensor.get_rgb().red / vSensor.get_rgb().blue) > 2)
+		if((vSensor.get_rgb().red / vSensor.get_rgb().blue) > 1.75)
 		{	
+			redPassed = true;
 			if(!canLimit && runningAuton)
 			{
 				topSystem.move(-mainSpeed);
@@ -148,8 +150,9 @@ void sort()
 		}
         //check if a blue ball is found and respond accordingly based on alliance color
 		else
-		if((vSensor.get_rgb().blue / vSensor.get_rgb().red) > 2)
+		if((vSensor.get_rgb().blue / vSensor.get_rgb().red) > 1.75)
 		{
+			bluePassed = true;
 			#ifdef RED
 			if(!disableBottom)
 				rearSystem.move(mainSpeed);
