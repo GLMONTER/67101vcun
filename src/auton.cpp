@@ -98,17 +98,17 @@ static void gyroTurn(const float deg)
     float value = 0.0;
 
     float target = deg;
-    float Ki = -0.006;
+    float Ki = -0.03;
     float Kd = -0.6;
     float Kp = -4.5;
 
-    while (abs(error) > 1 || leftBack.get_actual_velocity() > 0.1)
+    while (std::abs(error) > 1 || leftBack.get_actual_velocity() > 0.1)
     {
         pros::lcd::print(0, "val: %f\n", imu.get_yaw());
         error =  target - imu.get_yaw();
       //  printf("%f \n", error);
         integral = integral + error;
-        if (abs(error) < 2)
+        if (abs(error) < 1)
         {
             integral = 0.0;
         }
@@ -121,7 +121,7 @@ static void gyroTurn(const float deg)
     }
     setDrive(0,0);
 }
-std::shared_ptr<OdomChassisController> chassis =
+auto chassis =
   ChassisControllerBuilder()
     .withMotors(20, 6, 18, 10) // left motor is 1, right motor is 2 (reversed)
     // green gearset, 4 inch wheel diameter, 11.5 inch wheelbase
@@ -160,7 +160,7 @@ static void swingTurn(const int32_t forwardPower, const int32_t turnPower, const
         pros::delay(driveSettle);
 }
 
-std::shared_ptr<AsyncMotionProfileController> profileController =
+auto profileController =
   AsyncMotionProfileControllerBuilder()
     .withLimits({
       1.0, // Maximum linear velocity of the Chassis in m/s
@@ -191,7 +191,25 @@ void right()
     swingTurn(100, 30, 400, 0, false);
 
     waitUntilPressCount(2, false, 0);
+    
+    pros::delay(200);
+    setDrive(-60, -60);
+    pros::delay(500);
+    SORT_SYS_ENABLE  =false;
+    topSystem.move(127);
+    setDrive(60, 60);
+    pros::delay(600);
+    setDrive(0, 0);
+
+     pros::delay(1000);
+    setLoaders(loaderSetting::Backward);
+
+    setDrive(-60, -60);
+    pros::delay(500);
+    setDrive(0,0);
+
     chassis->setMaxVelocity(150);
+    
     chassis->moveDistance(-1_ft);
 }
 
@@ -236,13 +254,10 @@ void rightElim()
 void left()
 {
     swingTurn(100, -20, 1000, 0, false);
-    swingTurn(100, -30, 400, 0, false);
+    swingTurn(100, -32, 400, 0, false);
 
-    //waitUntilPressCount(2, false, 0);
-    while(limitPresses < 2)
-    {
-        pros::delay(10);
-    }
+    waitUntilPressCount(2, false, 0);
+    
     pros::delay(200);
     setDrive(-60, -60);
     pros::delay(500);
@@ -266,39 +281,54 @@ void left()
 }
 void Skills()
 {
-      chassis->setMaxVelocity(90);
     canLimit = true;
-    chassis->driveToPoint({3_ft, 0_ft}, false);
+    
+    profileController->generatePath({
+    {0_ft, 0_ft, 0_deg},
+  {4.2_ft, 0_ft, 0_deg}  // Profile starting position, this will normally be (0, 0, 0)
+ }, // The next point in the profile, 3 feet forward
+  "A" // Profile name
+);
+profileController->setTarget("A");
 
-    gyroTurn(-60);
-    chassis->setMaxVelocity(125);
+profileController->waitUntilSettled();
+setLoaders(loaderSetting::Backward);
+gyroTurn(62);
+pros::delay(1000);
+chassis->setMaxVelocity(75);
+setDrive(75, 75);
+pros::delay(2000);
+canLimit = false;
+pros::delay(500);
+setDrive(-50, -50);
+pros::delay(750);
+setDrive(0,0);
+gyroTurn(62);
 
-    chassis->driveToPoint({3.05_ft, -1.6_ft}, false);
 
-    SORT_SYS_ENABLE = false;
-    rearSystem.move(-127);
-    pros::delay(250);
-    SORT_SYS_ENABLE = true;
-    canLimit = false;
-    pros::delay(500);
-    chassis->driveToPoint({2.25_ft, 0.9_ft}, true);
-    canLimit = true;
-    chassis->turnToAngle(-37_deg);
-    chassis->driveToPoint({3.5_ft, -0.3_ft}, false);
-   // gyroTurn(-37);
+canLimit = true;
+setLoaders(loaderSetting::Forward);
 
-    chassis->driveToPoint({3.9_ft, -0.45_ft}, false);
-    chassis->setState({0_in, 0_in, 0_deg});
-    chassis->driveToPoint({-1.5_ft, 2.75_ft}, true);
-    gyroTurn(-15);
-    chassis->driveToPoint({-0.25_ft, 2.75_ft}, false);
-    gyroTurn(-20);
-    rearSystem.move(-127);
-    pros::delay(250);
-    SORT_SYS_ENABLE = true;
-    canLimit = false;
-  
-    pros::delay(10000);
+strafeAb(-100);
+pros::delay(950);
+setDrive(0, 0);
+
+chassis->setMaxVelocity(90);
+
+profileController->generatePath({
+    {0_ft, 0_ft, 0_deg},
+  {10_ft, 1_ft, 0_deg}  // Profile starting position, this will normally be (0, 0, 0)
+ }, // The next point in the profile, 3 feet forward
+  "B" // Profile name
+);
+profileController->setTarget("B");
+profileController->waitUntilSettled();
+gyroTurn(28);
+setDrive(80, 80);
+pros::delay(3500);
+canLimit = false;
+
+pros::delay(5000);
 
 }
 
@@ -308,7 +338,7 @@ void runAuton()
     runningAuton = true;
     init();
     setLoaders(loaderSetting::Forward);
-    left();
+    Skills();
 
     runningAuton = false;
 }
