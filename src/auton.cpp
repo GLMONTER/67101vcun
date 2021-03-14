@@ -31,7 +31,7 @@ void init()
 	topSystem.move(127);
 	rearSystem.move(127);
     //intake loaders
-	setLoaders(0);
+	setLoaders(1);
 	pros::Task::delay(1500);
 	topSystem.move(0);
 }
@@ -187,12 +187,12 @@ void home()
 }
 void right()
 {
-    swingTurn(100, 20, 1000, 0, false);
-    swingTurn(100, 30, 400, 0, false);
+   swingTurn(100, 20, 1000, 0, false);
+    swingTurn(100, 27, 400, 0, false);
 
     waitUntilPressCount(2, false, 0);
     
-    pros::delay(200);
+    pros::delay(400);
     setDrive(-60, -60);
     pros::delay(500);
     SORT_SYS_ENABLE  =false;
@@ -254,17 +254,17 @@ void rightElim()
 void left()
 {
     swingTurn(100, -20, 1000, 0, false);
-    swingTurn(100, -32, 400, 0, false);
+    swingTurn(100, -27, 400, 0, false);
 
     waitUntilPressCount(2, false, 0);
     
-    pros::delay(200);
+    pros::delay(400);
     setDrive(-60, -60);
     pros::delay(500);
     SORT_SYS_ENABLE  =false;
     topSystem.move(127);
     setDrive(60, 60);
-    pros::delay(500);
+    pros::delay(700);
     setDrive(0, 0);
 
      pros::delay(1000);
@@ -285,7 +285,7 @@ void Skills()
     
     profileController->generatePath({
     {0_ft, 0_ft, 0_deg},
-  {4.2_ft, 0_ft, 0_deg}  // Profile starting position, this will normally be (0, 0, 0)
+  {4.25_ft, 0_ft, 0_deg}  // Profile starting position, this will normally be (0, 0, 0)
  }, // The next point in the profile, 3 feet forward
   "A" // Profile name
 );
@@ -323,7 +323,7 @@ profileController->generatePath({
 );
 profileController->setTarget("B");
 profileController->waitUntilSettled();
-gyroTurn(28);
+gyroTurn(32);
 setDrive(80, 80);
 pros::delay(3500);
 canLimit = false;
@@ -338,7 +338,7 @@ void runAuton()
     runningAuton = true;
     init();
     setLoaders(loaderSetting::Forward);
-    Skills();
+    right();
 
     runningAuton = false;
 }

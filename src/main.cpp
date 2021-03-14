@@ -3,7 +3,7 @@
 
 void initialize()
 {
-	//init gyro
+	//init gyro and screen
 	pros::lcd::initialize();
     imu.reset();
     pros::delay(2000);
@@ -31,11 +31,6 @@ void autonomous()
 	runAuton();
 }
 
-
-//toggles for Trio
-static bool flyToggle = 0;
-static bool flyPressed = 0;
-
 //toggles for sorting system
 bool sortToggle = 1;
 static bool sortPressed = 0;
@@ -44,7 +39,7 @@ bool canLimit = false;
 
 static bool topToggle = false;
 static bool topPressed;
-extern void trackPosition();
+//extern void trackPosition();
 extern bool runningAuton;
 //extern void moveToPoint(const float x, const float y, const float angle);
 void opcontrol() 
@@ -59,8 +54,7 @@ void opcontrol()
 	lv_img_set_src(im, &vaquita);
 	lv_obj_set_pos(im,  0, -75);
 	lv_obj_set_drag(im, false);
-*/	
-	//moveToPoint(0, 0, 1.6);
+*/
 	while (true) 
 	{
 		static int i = 0;
@@ -80,7 +74,7 @@ void opcontrol()
 			}
 			
 			std::string topTemp = "TOP:" + std::to_string((int)topSystem.get_temperature()) 
-			+ " BOT:" + std::to_string((int)rearSystem.get_temperature()) + " DRV STAT:" + faultStatus.c_str();
+			+ " BOT:" + std::to_string((int)rearSystem.get_temperature()) + " : " + faultStatus.c_str();
 	
 
 			controller.print(0, 0, "%s" , topTemp.c_str());
@@ -97,29 +91,6 @@ void opcontrol()
 		rightFront.move(ch3 - ch1 - ch4);
 		leftBack.move(ch3 + ch1 - ch4);
 		rightBack.move(ch3 - ch1 + ch4);
-		
-
-		//a load toggle to allow shooting.
-		if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT))
-		{
-			if(!topPressed)
-			{
-				topToggle = 1 - topToggle;
-
-				topPressed = 1;
-			}
-		}
-		else
-			topPressed = 0;
-
-		if(topToggle)
-		{
-			//canLimit = true;
-		}
-		else
-		{
-			//canLimit = false;
-		}
 
 		//a failsafe for the sorting system
 		if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_X))
@@ -143,8 +114,6 @@ void opcontrol()
 			SORT_SYS_ENABLE = false;
 			sortFailsafe();
 		}
-
-		
 
 		//LOADING SYSTEM.
 		if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1))
