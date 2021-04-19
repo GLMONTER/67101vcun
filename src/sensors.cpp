@@ -46,7 +46,7 @@ void pollSensors()
 		//add to the amount of balls that passed through
 		limitPresses++;
 		//print new value
-		pros::lcd::print(4, "%d", limitPresses);
+		//::print(4, "%d", limitPresses);
 	}
 }
 //flags to disable certain drums.
@@ -82,8 +82,8 @@ void sort()
 	while(true)
 	{
 		//printing for debugging
-		pros::lcd::print(1, "%f", vSensor.get_rgb().red);
-		pros::lcd::print(2, "%f", vSensor.get_rgb().blue);
+		//::print(1, "%f", vSensor.get_rgb().red);
+		//pros::lcd::print(2, "%f", vSensor.get_rgb().blue);
 		
         //if the sorting system is disabled then don't attemp to sort.
         if(!SORT_SYS_ENABLE)

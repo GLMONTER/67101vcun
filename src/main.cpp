@@ -5,13 +5,13 @@ void initialize()
 {
 	//init gyro and screen
 	pros::lcd::initialize();
-    imu.reset();
-    pros::delay(2000);
+    //imu.reset();
+    //pros::delay(2000);
 	
-	pros::Task pollTask(pollSensors, "poll");
+	//pros::Task pollTask(pollSensors, "poll");
 	
 	//start the async sort task to begin sorting during driver control.
-	pros::Task sortTask(sort);
+	//pros::Task sortTask(sort);
 }
 
 void disabled()
@@ -39,12 +39,15 @@ bool canLimit = false;
 
 static bool topToggle = false;
 static bool topPressed;
-//extern void trackPosition();
+extern void trackPosition();
 extern bool runningAuton;
-//extern void moveToPoint(const float x, const float y, const float angle);
+extern void moveToPoint(const float x, const float y, const float angle);
 void opcontrol() 
 {
 	runningAuton = false;
+	//moveToPoint(-10,10 , 1.0f);
+	//moveToPoint(0,40 , 90);
+	//moveToPoint(20, 10, 90);
 	/*
 	LV_IMG_DECLARE(vaquita);
 
@@ -57,6 +60,7 @@ void opcontrol()
 */
 	while (true) 
 	{
+trackPosition();
 		static int i = 0;
 		if(i == 100)
 		{
@@ -76,7 +80,7 @@ void opcontrol()
 			std::string topTemp = "TOP:" + std::to_string((int)topSystem.get_temperature()) 
 			+ " BOT:" + std::to_string((int)rearSystem.get_temperature()) + " : " + faultStatus.c_str();
 	
-
+			
 			controller.print(0, 0, "%s" , topTemp.c_str());
 
 			i = 0;

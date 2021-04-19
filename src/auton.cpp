@@ -126,7 +126,7 @@ auto chassis =
     .withMotors(20, 6, 18, 10) // left motor is 1, right motor is 2 (reversed)
     // green gearset, 4 inch wheel diameter, 11.5 inch wheelbase
     .withDimensions(AbstractMotor::gearset::green, {{4_in, 9_in}, imev5GreenTPR})
-    
+    /*
     // left encoder in ADI ports A & B, right encoder in ADI ports C & D (reversed)
  .withSensors(
         ADIEncoder{'C', 'D', false}, // left encoder in ADI ports A & B
@@ -135,6 +135,8 @@ auto chassis =
     
 .withOdometry({{2.75_in, 15_in}, quadEncoderTPR}, StateMode::FRAME_TRANSFORMATION)    
 .buildOdometry();
+*/
+.build();
 
 auto xModel = std::dynamic_pointer_cast<XDriveModel>(chassis->getModel());
 
@@ -177,10 +179,10 @@ void home()
 
     waitUntilPressCount(2, false, 0);
     chassis->setMaxVelocity(150);
-    chassis->driveToPoint({2_ft, 0.5_ft}, true);
+   // chassis->driveToPoint({2_ft, 0.5_ft}, true);
     
     
-    chassis->driveToPoint({4_ft, -3_ft}, true);
+   // chassis->driveToPoint({4_ft, -3_ft}, true);
     
     waitUntilPressCount(5, false, 0);
 
