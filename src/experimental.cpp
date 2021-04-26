@@ -6,7 +6,7 @@
 
 
 #define WHEEL_DIAM 2.783
-float SPIN_TO_IN_LR  = (WHEEL_DIAM * PI / 360);
+float SPIN_TO_IN_LR  = (WHEEL_DIAM * PI / 360.0);
 #define L_DISTANCE_IN 7.5
 #define R_DISTANCE_IN 7.5
 #define S_DISTANCE_IN 4.75
@@ -55,12 +55,12 @@ void trackPosition()
 	float a = (L - R) / (L_DISTANCE_IN + R_DISTANCE_IN); // The angle that I've traveled
 	if (a)
 	{
-		float r = R / a + R_DISTANCE_IN; // The radius of the circle the robot travel's around with the right side of the robot
+		float r = R / a; // The radius of the circle the robot travel's around with the right side of the robot
 		i = a / 2.0;
 		float sinI = sin(i);
 		h = ((r + R_DISTANCE_IN) * sinI) * 2.0;
 
-		float r2 = S / a + S_DISTANCE_IN; // The radius of the circle the robot travel's around with the back of the robot
+		float r2 = S / a; // The radius of the circle the robot travel's around with the back of the robot
 		h2 = ((r2 + S_DISTANCE_IN) * sinI) * 2.0;
 	}
 	else

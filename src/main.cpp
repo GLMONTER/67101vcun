@@ -74,7 +74,8 @@ void opcontrol()
 		
 	//	trackPosition();
 		moveToPoint(12, 12, 1.57);
-		//moveToPoint(0, 12, 1.5);
+		moveToPoint(0, 36, 0);
+		pros::Task::delay(100000);
 		//moveToPoint(6, 18, 45);
 		
 		static int i = 0;
