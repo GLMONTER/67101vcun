@@ -56,7 +56,7 @@ extern void moveToPoint(const float x, const float y, const float angle);
 void opcontrol() 
 {
 	runningAuton = false;
-	//moveToPoint(-10,10 , 1.0f);
+	//moveToPoint(0,10 , 0);
 	//moveToPoint(0,40 , 90);
 	//moveToPoint(20, 10, 90);
 	/*
@@ -71,12 +71,12 @@ void opcontrol()
 */
 	while (true) 
 	{
-		trackPosition();
-		/*
-		moveToPoint(0, 12, 0);
-		moveToPoint(0, 12, 45);
-		moveToPoint(6, 18, 45);
-		*/
+		
+	//	trackPosition();
+		moveToPoint(12, 12, 1.57);
+		//moveToPoint(0, 12, 1.5);
+		//moveToPoint(6, 18, 45);
+		
 		static int i = 0;
 		if(i == 100)
 		{

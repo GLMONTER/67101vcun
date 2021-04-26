@@ -169,29 +169,34 @@ float getNewAngle(const float target)
 }
 //calculating error between requested position and current position using pid and running the drive train
 void moveToPoint(const float x, const float y, const float angle)
-{
-    std::cout<<"moving"<<std::endl;
-   
-   while((std::abs(position.x - x) > 0.25) || (std::abs(position.y - y) > 0.25) || (std::abs(position.a - angle) > 0.25))
+{   
+   while((std::abs(position.x - x) > 0.5) || (std::abs(position.y - y) > 0.5) || (std::abs(position.a - angle) > 0.01))
     {
+        //GET SPEED FIGURED
         trackPosition();
-        
-        float tempY = getNewY(y);
-        float tempX = getNewX(x);
+    
+        float Speed = 0.5;
+        float T = std::atan2((y - position.y), (x - position.x)) + position.a;
+        std::cout<<T<<std::endl;
+        float Psub1 = -(cos(T + (M_PI / 4)) / cos(M_PI / 4));
+        float Psub2 = -(cos(T + (3 * M_PI) / 4)) / (cos(M_PI / 4));
+        std::cout<<"P1 : "<<Psub1<<std::endl;
+        std::cout<<"P2 : "<<Psub2<<std::endl;
 
-        float tempAngle = getNewAngle(angle);
+        float SubS = std::max(std::abs(Psub1), std::abs(Psub2)) / Speed;
+        std::cout<<"SUB S : "<<SubS<<std::endl;
 
-        int32_t frontLeftV = tempY + tempX + tempAngle;
-        int32_t backLeftV = tempY - tempX + tempAngle;
-        int32_t backRightV = tempY + tempX - tempAngle;
-        int32_t frontRightV = tempY - tempX - tempAngle;        
+        float differenceOfAngle = (angle - position.a);
+        std::cout<<"DIF A : "<<differenceOfAngle<<std::endl;
+        float m_FrontLeft = (Psub2/SubS) * (1 - std::abs(differenceOfAngle)) + differenceOfAngle;
+        std::cout<<"M FL : "<<m_FrontLeft<<std::endl;
+        float m_FrontRight = (Psub1/SubS) * (1 - std::abs(differenceOfAngle)) - differenceOfAngle;
+        float m_BackLeft = (Psub1/SubS) * (1 - std::abs(differenceOfAngle)) + differenceOfAngle;
+        float m_BackRight = (Psub2/SubS) * (1 - std::abs(differenceOfAngle)) - differenceOfAngle;
 
-        std::cout<<"x : "<<tempX<<" y : "<<tempY<<" A "<<tempAngle<<std::endl;
-        std::cout<<"pos : "<<position.x << " " << position.y << " "<<position.a<<std::endl;
-        
-       
-        setDriveSpec(frontLeftV, backLeftV, frontRightV, backRightV);
+        setDriveSpec(m_FrontLeft * 127, m_BackLeft * 127, m_FrontRight * 127, m_BackRight * 127);
 
         pros::delay(5);
     }
+    setDriveSpec(0,0,0,0);
 }
