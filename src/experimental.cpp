@@ -169,7 +169,7 @@ float getNewAngle(const float target)
 }
 //calculating error between requested position and current position using pid and running the drive train
 void moveToPoint(const float x, const float y, const float angle)
-{   
+{
    while((std::abs(position.x - x) > 0.5) || (std::abs(position.y - y) > 0.5) || (std::abs(position.a - angle) > 0.01))
     {
         //GET SPEED FIGURED

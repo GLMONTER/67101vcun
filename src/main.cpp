@@ -5,13 +5,11 @@ void initialize()
 {
 	//init gyro and screen
 	pros::lcd::initialize();
-    //imu.reset();
-    //pros::delay(2000);
 	
-	//pros::Task pollTask(pollSensors, "poll");
+	pros::Task pollTask(pollSensors, "poll");
 	
 	//start the async sort task to begin sorting during driver control.
-	//pros::Task sortTask(sort);
+	pros::Task sortTask(sort);
 }
 
 void disabled()
@@ -71,12 +69,7 @@ void opcontrol()
 */
 	while (true) 
 	{
-		
-	//	trackPosition();
-		moveToPoint(12, 12, 1.57);
-		moveToPoint(0, 36, 0);
-		pros::Task::delay(100000);
-		//moveToPoint(6, 18, 45);
+		trackPosition();
 		
 		static int i = 0;
 		if(i == 100)

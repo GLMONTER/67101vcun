@@ -16,6 +16,9 @@ extern bool disableTop;
 extern bool disableBottom;
 extern int32_t topVelocity;
 
+
+extern void moveToPoint(const float x, const float y, const float angle);
+
 //pre-defind loading settings for easier understanding
 enum loaderSetting
 {
@@ -337,10 +340,21 @@ pros::delay(5000);
 //actually running the auton
 void runAuton()
 {
+    canLimit = true;
     runningAuton = true;
     init();
     setLoaders(loaderSetting::Forward);
-    right();
+	moveToPoint(-12.5, 52, -0.29);
+    setLoaders(loaderSetting::Backward);
+    moveToPoint(-14.77, 69.44, 0.838);
+    moveToPoint(-11.87, 73.41, 0.856);
+    moveToPoint(-14.77, 69.44, 0.838);
+    moveToPoint(-11.87, 73.41, 0.856);
+    moveToPoint(-14.77, 69.44, 0.838);
+    moveToPoint(-11.87, 73.41, 0.856);
+    moveToPoint(-14.77, 69.44, 0.838);
+
+
 
     runningAuton = false;
 }
