@@ -1,6 +1,6 @@
 #include "main.h"
 #include"display/lvgl.h"
-
+extern void tracking();
 void initialize()
 {
 	//init gyro and screen
@@ -10,6 +10,9 @@ void initialize()
 	
 	//start the async sort task to begin sorting during driver control.
 	pros::Task sortTask(sort);
+
+	//start custom controller tracking.
+	pros::Task controllerTrack(tracking);
 }
 
 void disabled()
