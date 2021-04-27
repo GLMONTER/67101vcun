@@ -1,1 +1,4 @@
-topSystem is 3 drump
+Resources for tracking and motion 
+For tracking : https://github.com/nickmertin/5225A-2017-2018/blob/master/src
+Motion : https://www.vexforum.com/t/x-drive-directional-drive-control-code-release-kind-of/82330
+Also for motion : https://www.desmos.com/calculator/ehw57ixfbb
