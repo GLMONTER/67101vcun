@@ -40,6 +40,7 @@ struct Position
 };
 
 extern Position position;
+
 //toggles for sorting system
 bool sortToggle = 1;
 static bool sortPressed = 0;
@@ -48,15 +49,14 @@ bool canLimit = false;
 
 static bool topToggle = false;
 static bool topPressed;
+
 extern void trackPosition();
 extern bool runningAuton;
 extern void moveToPoint(const float x, const float y, const float angle);
+
 void opcontrol() 
 {
 	runningAuton = false;
-	//moveToPoint(0,10 , 0);
-	//moveToPoint(0,40 , 90);
-	//moveToPoint(20, 10, 90);
 	/*
 	LV_IMG_DECLARE(vaquita);
 

@@ -4,7 +4,6 @@
 //for trig functions
 #include<cmath>
 
-
 #define WHEEL_DIAM 2.783
 float SPIN_TO_IN_LR  = (WHEEL_DIAM * PI / 360.0);
 #define L_DISTANCE_IN 7.5
@@ -27,7 +26,7 @@ struct Position
 
 Position position;
 
-void setDriveSpec(const int32_t leftFrontV,const int32_t leftBackV,const int32_t rightFrontV,const int32_t rightBackV)
+void setDriveSpec(const int32_t leftFrontV,const int32_t leftBackV, const int32_t rightFrontV, const int32_t rightBackV)
 {
     leftFront.move(leftFrontV);
     leftBack.move(leftBackV);
@@ -78,8 +77,8 @@ void trackPosition()
 	position.y += h * cosP;
 	position.x += h * sinP;
 
-	position.y += h2 * -sinP; // -sin(x) = sin(-x)
-	position.x += h2 * cosP; // cos(x) = cos(-x)
+	position.y += h2 * -sinP;
+	position.x += h2 * cosP; 
 
 	position.a += a;
   
@@ -172,31 +171,31 @@ void moveToPoint(const float x, const float y, const float angle)
 {
    while((std::abs(position.x - x) > 0.5) || (std::abs(position.y - y) > 0.5) || (std::abs(position.a - angle) > 0.01))
     {
-        //GET SPEED FIGURED
         trackPosition();
     
         float Speed = 0.5;
+        //What direction to drive in
         float T = std::atan2((y - position.y), (x - position.x)) + position.a;
-        std::cout<<T<<std::endl;
+
+        //refer to movement document
         float Psub1 = -(cos(T + (M_PI / 4)) / cos(M_PI / 4));
         float Psub2 = -(cos(T + (3 * M_PI) / 4)) / (cos(M_PI / 4));
-        std::cout<<"P1 : "<<Psub1<<std::endl;
-        std::cout<<"P2 : "<<Psub2<<std::endl;
 
         float SubS = std::max(std::abs(Psub1), std::abs(Psub2)) / Speed;
-        std::cout<<"SUB S : "<<SubS<<std::endl;
-
+        //difference in rotation from current rotation to target rotation
         float differenceOfAngle = (angle - position.a);
-        std::cout<<"DIF A : "<<differenceOfAngle<<std::endl;
+
+        //calculate motor values from -1 to 1
         float m_FrontLeft = (Psub2/SubS) * (1 - std::abs(differenceOfAngle)) + differenceOfAngle;
-        std::cout<<"M FL : "<<m_FrontLeft<<std::endl;
         float m_FrontRight = (Psub1/SubS) * (1 - std::abs(differenceOfAngle)) - differenceOfAngle;
         float m_BackLeft = (Psub1/SubS) * (1 - std::abs(differenceOfAngle)) + differenceOfAngle;
         float m_BackRight = (Psub2/SubS) * (1 - std::abs(differenceOfAngle)) - differenceOfAngle;
 
+        //actually set drive values and scale to 127
         setDriveSpec(m_FrontLeft * 127, m_BackLeft * 127, m_FrontRight * 127, m_BackRight * 127);
 
         pros::delay(5);
     }
+    //turn off drive when done.
     setDriveSpec(0,0,0,0);
 }
