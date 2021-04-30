@@ -71,9 +71,7 @@ void opcontrol()
 	lv_obj_set_drag(im, false);
 */
 	while (true) 
-	{
-		trackPosition();
-		
+	{		
 		static int i = 0;
 		if(i == 100)
 		{
@@ -136,22 +134,18 @@ void opcontrol()
 		//LOADING SYSTEM.
 		if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1))
 		{
-			rightLoader.move(127);
-			leftLoader.move(127);
+			setLoaders(loaderSetting::Forward);
 		}
 		else
 		if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1))
 		{
-			rightLoader.move(-127);
-			leftLoader.move(-127);
+			setLoaders(loaderSetting::Backward);
 		}
 		else
 		if(!controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1) && !controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1))
 		{
-			rightLoader.move(0);
-			leftLoader.move(0);
+			setLoaders(loaderSetting::Disabled);
 		}
-		
-	//	pros::delay(10);
+		pros::delay(5);
 	}
 }

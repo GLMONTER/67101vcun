@@ -4,10 +4,15 @@
 //for trig functions
 #include<cmath>
 
+//tracking wheel diameter in inches
 #define WHEEL_DIAM 2.783
+//calculate how far the wheel will travel in one rotation
 float SPIN_TO_IN_LR  = (WHEEL_DIAM * PI / 360.0);
+//distance from the left tracking wheel to tracking center
 #define L_DISTANCE_IN 7.5
+//distance from the right tracking wheel to tracking center
 #define R_DISTANCE_IN 7.5
+//distance from the rear tracking wheel to tracking center
 #define S_DISTANCE_IN 4.75
 
 pros::ADIEncoder leftEncoder(3, 4, false);
@@ -33,6 +38,7 @@ void setDriveSpec(const int32_t leftFrontV,const int32_t leftBackV, const int32_
     rightFront.move(rightFrontV);
     rightBack.move(rightBackV);
 }
+
 void trackPosition()
 {    
     int32_t left = leftEncoder.get_value();

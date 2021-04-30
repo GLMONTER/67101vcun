@@ -63,6 +63,13 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+//pre-defind loading settings for easier understanding
+enum loaderSetting
+{
+    Forward = 0,
+    Backward = 1,
+    Disabled = 2
+};
 void autonomous(void);
 void initialize(void);
 void disabled(void);
