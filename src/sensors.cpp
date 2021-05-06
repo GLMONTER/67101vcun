@@ -8,7 +8,7 @@ pros::Distance distance_sensor(12);
 extern bool canLimit;
 
 //define the alliance color to sort the correct ball color.
-#define BLUE
+#define RED
 bool redPassed = false;
 bool bluePassed = false;
 //tuning variables

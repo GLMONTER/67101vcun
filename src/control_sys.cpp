@@ -2,18 +2,17 @@
 
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
 
-pros::Motor leftLoader(2, pros::E_MOTOR_GEARSET_06, false);
-pros::Motor rightLoader(9, pros::E_MOTOR_GEARSET_06, true);
+pros::Motor leftLoader(2, pros::E_MOTOR_GEARSET_18, false);
+pros::Motor rightLoader(9, pros::E_MOTOR_GEARSET_18, true);
 
-pros::Motor rightFront(6, true);
-pros::Motor leftFront(20, false);
-pros::Motor rightBack(18, true);
-pros::Motor leftBack(10, false);
+pros::Motor rightFront(6, pros::E_MOTOR_GEARSET_18, true);
+pros::Motor leftFront(20, pros::E_MOTOR_GEARSET_18, false);
+pros::Motor rightBack(18, pros::E_MOTOR_GEARSET_18, true);
+pros::Motor leftBack(10, pros::E_MOTOR_GEARSET_18, false);
 
 //includes flywheel, and the two lifts
 pros::Motor topSystem(19, pros::E_MOTOR_GEARSET_06, false);
 pros::Motor rearSystem(5, pros::E_MOTOR_GEARSET_06, false);
-
 
 //toggles for lift
 static bool buttonToggleR = 0;
@@ -23,13 +22,6 @@ static bool buttonToggleF = 0;
 static bool buttonPressedF = 0;
 
 extern bool sortToggle;
-
-enum loaderSetting
-{
-    Forward = 0,
-    Backward = 1,
-    Disabled = 2
-};
 
 void setDrive(const int32_t leftPower, const int32_t rightPower)
 {

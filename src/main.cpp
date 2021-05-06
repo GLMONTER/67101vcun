@@ -1,6 +1,7 @@
 #include "main.h"
 #include"display/lvgl.h"
 extern void tracking();
+extern void trackPosition();
 void initialize()
 {
 	//init gyro and screen
@@ -13,6 +14,8 @@ void initialize()
 
 	//start custom controller tracking.
 	pros::Task controllerTrack(tracking);
+
+	//pros::Task TRACKPOS(trackPosition);
 }
 
 void disabled()
@@ -53,7 +56,7 @@ bool canLimit = false;
 static bool topToggle = false;
 static bool topPressed;
 
-extern void trackPosition();
+
 extern bool runningAuton;
 extern void moveToPoint(const float x, const float y, const float angle);
 
@@ -71,7 +74,13 @@ void opcontrol()
 	lv_obj_set_drag(im, false);
 */
 	while (true) 
-	{		
+	{
+		/*
+		while(true)
+		{
+			trackPosition();
+		}
+		*/
 		static int i = 0;
 		if(i == 100)
 		{
@@ -91,7 +100,6 @@ void opcontrol()
 			std::string topTemp = "TOP:" + std::to_string((int)topSystem.get_temperature()) 
 			+ " BOT:" + std::to_string((int)rearSystem.get_temperature()) + " : " + faultStatus.c_str();
 			std::string log = "angle :" + std::to_string(position.a * 180/3.14); //"Y:" + std::to_string(position.y) + " X:" + std::to_string(position.x) + "R:" + std::to_string(position.a);
-
 			
 			controller.print(0, 0, "%s" , log.c_str());
 

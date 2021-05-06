@@ -14,7 +14,7 @@ float SPIN_TO_IN_LR  = (WHEEL_DIAM * PI / 360.0);
 #define R_DISTANCE_IN 7.5
 //distance from the rear tracking wheel to tracking center
 #define S_DISTANCE_IN 4.75
-
+#define PID_ENABLE true
 pros::ADIEncoder leftEncoder(3, 4, false);
 pros::ADIEncoder rightEncoder(5, 6, false);
 pros::ADIEncoder middleEncoder(1, 2, false);
@@ -99,58 +99,11 @@ void trackPosition()
     pros::delay(5);
     
 }
-//PID function for the x axis
-float getNewX(const float target)
+
+
+float getNewPID(const float error)
 {
-    static float error;
-    static float integral;
-    static float derivative;
-    static float previousError;
-    static float driveValue;
-
-    const float Ki = 0.3f;
-    const float Kd = 0.6f;
-    const float Kp = 10.5f;
-
-    error = target - position.x;
-    integral = integral + error;
-    if(abs(error) < 0.25f)
-    {
-        integral = 0.0f;
-    }
-
-    derivative = error - previousError;
-    previousError = error;
-    return (integral*Ki) + (derivative*Kd) + (error*Kp);
-}
-
-float getNewY(const float target)
-{
-    static float error;
-    static float integral;
-    static float derivative;
-    static float previousError;
-    static float driveValue;
-
-    const float Ki = 0.3f;
-    const float Kd = 0.6f;
-    const float Kp = 10.5f;
-
-    error = target - position.y;
-    integral = integral + error;
-    if(abs(error) < 0.25f)
-    {
-        integral = 0.0f;
-    }
-
-    derivative = error - previousError;
-    previousError = error;
-    return (integral*Ki) + (derivative*Kd) + (error*Kp);
-}
-
-float getNewAngle(const float target)
-{
-    static float error;
+   // static float error;
     static float integral;
     static float derivative;
     static float previousError;
@@ -161,7 +114,6 @@ float getNewAngle(const float target)
     const float Kp = 10.5f;
     //subject to change heading for yaw
     
-    error = target - position.a;
     integral = integral + error;
     if(abs(error) < 1.0f)
     {
@@ -175,11 +127,15 @@ float getNewAngle(const float target)
 //calculating error between requested position and current position using pid and running the drive train
 void moveToPoint(const float x, const float y, const float angle)
 {
-   while((std::abs(position.x - x) > 0.5) || (std::abs(position.y - y) > 0.5) || (std::abs(position.a - angle) > 0.01))
+    while((std::abs(position.x - x) > 0.75) || (std::abs(position.y - y) > 0.75) || (std::abs(position.a - angle) > 0.01))
     {
+        //update position
         trackPosition();
-    
-        float Speed = 0.5;
+        #if PID_ENABLE
+        float Speed = 1.0;
+        #else
+        float Speed = 0.4;
+        #endif
         //What direction to drive in
         float T = std::atan2((y - position.y), (x - position.x)) + position.a;
 
@@ -190,18 +146,25 @@ void moveToPoint(const float x, const float y, const float angle)
         float SubS = std::max(std::abs(Psub1), std::abs(Psub2)) / Speed;
         //difference in rotation from current rotation to target rotation
         float differenceOfAngle = (angle - position.a);
-
+        float scaleValue = std::abs(std::sqrt((position.x - x) + (position.y - y))) + 3 * differenceOfAngle;
         //calculate motor values from -1 to 1
         float m_FrontLeft = (Psub2/SubS) * (1 - std::abs(differenceOfAngle)) + differenceOfAngle;
         float m_FrontRight = (Psub1/SubS) * (1 - std::abs(differenceOfAngle)) - differenceOfAngle;
         float m_BackLeft = (Psub1/SubS) * (1 - std::abs(differenceOfAngle)) + differenceOfAngle;
         float m_BackRight = (Psub2/SubS) * (1 - std::abs(differenceOfAngle)) - differenceOfAngle;
+        float scaledPID = getNewPID(scaleValue);
+        #if PID_ENABLE
+        setDriveSpec(m_FrontLeft * scaledPID, m_BackLeft * scaledPID, m_FrontRight * scaledPID, m_BackRight * scaledPID);
 
+        #else
         //actually set drive values and scale to 127
         setDriveSpec(m_FrontLeft * 127, m_BackLeft * 127, m_FrontRight * 127, m_BackRight * 127);
+        #endif
+
 
         pros::delay(5);
     }
     //turn off drive when done.
     setDriveSpec(0,0,0,0);
+    pros::delay(50);
 }
