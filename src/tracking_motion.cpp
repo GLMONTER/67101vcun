@@ -30,7 +30,18 @@ struct Position
 };
 
 Position position;
+void lockDrive()
+{
+    leftFront.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
+    leftBack.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
+    rightFront.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
+    rightBack.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
 
+    leftFront.move_velocity(0);
+    leftBack.move_velocity(0);
+    rightFront.move_velocity(0);
+    rightBack.move_velocity(0);
+}
 void setDriveSpec(const int32_t leftFrontV,const int32_t leftBackV, const int32_t rightFrontV, const int32_t rightBackV)
 {
     leftFront.move(leftFrontV);
@@ -110,12 +121,12 @@ float getNewPID(const float error)
     static float driveValue;
 
     const float Ki = 0.5;
-    const float Kd = 1.0f;
-    const float Kp = 10.5f;
+    const float Kd = 0.3f;
+    const float Kp = 3.0f;
     //subject to change heading for yaw
     
     integral = integral + error;
-    if(abs(error) < 1.0f)
+    if(abs(error) < 0.25f)
     {
         integral = 0.0f;
     }
@@ -125,9 +136,27 @@ float getNewPID(const float error)
     return (integral*Ki) + (derivative*Kd) + (error*Kp);
 }
 //calculating error between requested position and current position using pid and running the drive train
-void moveToPoint(const float x, const float y, const float angle)
+void moveToPoint(const float x, const float y, const float angle, bool goThroughFlag, const uint32_t maxVelocity = 127, uint32_t timeout = 0)
 {
-    while((std::abs(position.x - x) > 0.75) || (std::abs(position.y - y) > 0.75) || (std::abs(position.a - angle) > 0.01))
+    static uint32_t timer;
+    timer = 0;
+    leftFront.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+    leftBack.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+    rightFront.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+    rightBack.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+    float posTamper;
+    float angleTamper;
+    if(goThroughFlag)
+    {
+        posTamper = 2.0f;
+        angleTamper = 0.1;
+    }
+    else
+    {
+        posTamper = 0.75f;
+        angleTamper = 0.01;
+    }
+    while((std::abs(position.x - x) > posTamper) || (std::abs(position.y - y) > posTamper) || (std::abs(position.a - angle) > angleTamper))
     {
         //update position
         trackPosition();
@@ -146,13 +175,18 @@ void moveToPoint(const float x, const float y, const float angle)
         float SubS = std::max(std::abs(Psub1), std::abs(Psub2)) / Speed;
         //difference in rotation from current rotation to target rotation
         float differenceOfAngle = (angle - position.a);
-        float scaleValue = std::abs(std::sqrt((position.x - x) + (position.y - y))) + 3 * differenceOfAngle;
+
+        float scaleValue = std::abs(std::sqrt(std::abs(position.x - x) + std::abs(position.y - y))) + (3 * differenceOfAngle);
+
         //calculate motor values from -1 to 1
         float m_FrontLeft = (Psub2/SubS) * (1 - std::abs(differenceOfAngle)) + differenceOfAngle;
         float m_FrontRight = (Psub1/SubS) * (1 - std::abs(differenceOfAngle)) - differenceOfAngle;
         float m_BackLeft = (Psub1/SubS) * (1 - std::abs(differenceOfAngle)) + differenceOfAngle;
         float m_BackRight = (Psub2/SubS) * (1 - std::abs(differenceOfAngle)) - differenceOfAngle;
         float scaledPID = getNewPID(scaleValue);
+        std::cout<<"Scaled : "<<scaledPID<<std::endl;
+        if(scaledPID > maxVelocity)
+            scaledPID = maxVelocity;
         #if PID_ENABLE
         setDriveSpec(m_FrontLeft * scaledPID, m_BackLeft * scaledPID, m_FrontRight * scaledPID, m_BackRight * scaledPID);
 
@@ -162,9 +196,17 @@ void moveToPoint(const float x, const float y, const float angle)
         #endif
 
 
-        pros::delay(5);
+        pros::delay(4);
+        timer += 5;
+        if((timeout != 0) && (timeout < timer))
+        {
+            break;
+        }
     }
     //turn off drive when done.
-    setDriveSpec(0,0,0,0);
+    if(!goThroughFlag)
+        lockDrive();
+    else
+        setDrive(0,0);
     pros::delay(50);
 }

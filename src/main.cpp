@@ -75,12 +75,12 @@ void opcontrol()
 */
 	while (true) 
 	{
-		/*
+		
 		while(true)
 		{
 			trackPosition();
 		}
-		*/
+		
 		static int i = 0;
 		if(i == 100)
 		{
