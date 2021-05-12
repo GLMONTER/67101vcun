@@ -52,6 +52,8 @@ void setDriveSpec(const int32_t leftFrontV,const int32_t leftBackV, const int32_
 
 void trackPosition()
 {    
+    while(true)
+    {
     int32_t left = leftEncoder.get_value();
     int32_t right = rightEncoder.get_value();
     int32_t back = middleEncoder.get_value();
@@ -108,7 +110,7 @@ void trackPosition()
     pros::lcd::print(5, "rotation :  %f\n", position.a);
 
     pros::delay(5);
-    
+    }
 }
 
 
@@ -158,8 +160,6 @@ void moveToPoint(const float x, const float y, const float angle, bool goThrough
     }
     while((std::abs(position.x - x) > posTamper) || (std::abs(position.y - y) > posTamper) || (std::abs(position.a - angle) > angleTamper))
     {
-        //update position
-        trackPosition();
         #if PID_ENABLE
         float Speed = 1.0;
         #else

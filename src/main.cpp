@@ -1,6 +1,17 @@
 #include "main.h"
 #include"display/lvgl.h"
 extern void tracking();
+struct Position
+{
+    float a;
+    float x;
+    float y;
+    int32_t leftLst;
+    int32_t rightLst;
+    int32_t backLst;
+};
+
+extern Position position;
 extern void trackPosition();
 void initialize()
 {
@@ -13,9 +24,9 @@ void initialize()
 	pros::Task sortTask(sort);
 
 	//start custom controller tracking.
-	pros::Task controllerTrack(tracking);
+	//pros::Task controllerTrack(tracking);
 
-	//pros::Task TRACKPOS(trackPosition);
+	pros::Task TRACKPOS(trackPosition);
 }
 
 void disabled()
@@ -35,17 +46,7 @@ void autonomous()
 	runAuton();
 }
 
-struct Position
-{
-    float a;
-    float x;
-    float y;
-    int32_t leftLst;
-    int32_t rightLst;
-    int32_t backLst;
-};
 
-extern Position position;
 
 //toggles for sorting system
 bool sortToggle = 1;
@@ -75,11 +76,6 @@ void opcontrol()
 */
 	while (true) 
 	{
-		
-		while(true)
-		{
-			trackPosition();
-		}
 		
 		static int i = 0;
 		if(i == 100)

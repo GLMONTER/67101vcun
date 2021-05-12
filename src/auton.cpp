@@ -190,8 +190,8 @@ void runAuton()
     canLimit = true;
     runningAuton = true;
     init();
-    //moveToPoint(0.0, 8.0, 0.0, true);
-    skills();
+    moveToPoint(0.0, 8.0, 0.0, false);
+    //skills();
 
 
     runningAuton = false;
