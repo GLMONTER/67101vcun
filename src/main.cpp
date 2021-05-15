@@ -95,9 +95,9 @@ void opcontrol()
 			
 			std::string topTemp = "TOP:" + std::to_string((int)topSystem.get_temperature()) 
 			+ " BOT:" + std::to_string((int)rearSystem.get_temperature()) + " : " + faultStatus.c_str();
-			std::string log = "angle :" + std::to_string(position.a * 180/3.14); //"Y:" + std::to_string(position.y) + " X:" + std::to_string(position.x) + "R:" + std::to_string(position.a);
+			//std::string log = "angle :" + std::to_string(position.a * 180/3.14); //"Y:" + std::to_string(position.y) + " X:" + std::to_string(position.x) + "R:" + std::to_string(position.a);
 			
-			controller.print(0, 0, "%s" , log.c_str());
+			controller.print(0, 0, "%s" , topTemp.c_str());
 
 			i = 0;
 		}

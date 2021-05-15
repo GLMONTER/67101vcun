@@ -12,7 +12,8 @@ extern bool canLimit;
 bool redPassed = false;
 bool bluePassed = false;
 //tuning variables
-static int32_t delayEject = 140;
+//215 for driving
+static int32_t delayEject = 150;
 static int32_t mainSpeed = 127;
 
 static int32_t minVelocity = 450;

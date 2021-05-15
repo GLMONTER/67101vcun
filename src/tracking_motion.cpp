@@ -122,17 +122,18 @@ float getNewPID(const float error)
     static float previousError;
     static float driveValue;
 
-    const float Ki = 0.5;
-    const float Kd = 0.3f;
-    const float Kp = 3.0f;
+    const float Ki = 0.1;
+    const float Kd = 3.0f;
+    const float Kp = 1.5f;
     //subject to change heading for yaw
     
     integral = integral + error;
+    /*
     if(abs(error) < 0.25f)
     {
         integral = 0.0f;
     }
-
+*/
     derivative = error - previousError;
     previousError = error;
     return (integral*Ki) + (derivative*Kd) + (error*Kp);
@@ -155,11 +156,15 @@ void moveToPoint(const float x, const float y, const float angle, bool goThrough
     }
     else
     {
-        posTamper = 0.75f;
-        angleTamper = 0.01;
+        posTamper = 1.0f;
+        angleTamper = 0.04;
     }
-    while((std::abs(position.x - x) > posTamper) || (std::abs(position.y - y) > posTamper) || (std::abs(position.a - angle) > angleTamper))
+    float averageVelocity = 0;
+    while((std::abs(position.x - x) > posTamper) || (std::abs(position.y - y) > posTamper) || (std::abs(position.a - angle) > angleTamper)
+    || averageVelocity > 35)
     {
+        averageVelocity = (leftFront.get_actual_velocity() + leftBack.get_actual_velocity() + 
+        rightFront.get_actual_velocity() + rightBack.get_actual_velocity()) / 4;
         #if PID_ENABLE
         float Speed = 1.0;
         #else

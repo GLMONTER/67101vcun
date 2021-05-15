@@ -77,26 +77,26 @@ void homeRow()
     setLoaders(loaderSetting::Forward);
     moveToPoint(0, 6, 0, true);
 
-    moveToPoint(-15, 31, -0.745, true, 150);
-    moveToPoint(-34, 36, -1.57, false, 100);
+    moveToPoint(-15, 31, -0.745, true, 90);
+    moveToPoint(-33, 35, -1.57, false, 90);
 
     waitUntilPressCount(1, false, 0);
     pros::delay(250);
 
-    moveToPoint(15.54, 3.56, -0.737, true, 130);
+    moveToPoint(15.54, 3.56, -0.737, true, 90);
     
     canLimit = false;
    
     
-    moveToPoint(37.5, -38.13, -3.068, true, 110);
+    moveToPoint(51, -36.13, -3, true, 90);
+    canLimit = true;
     //THIS ONE
-    moveToPoint(38, -52.5, -2.979, false, 80);
-    if(limitPresses == 2)
-        waitUntilPressCount(3, false, 0);
-    else
-        waitUntilPressCount(2, false, 0);
+    moveToPoint(50.5, -42, -3, false, 80, 3000);
+    canLimit = false;
 
-    pros::delay(750);
+    pros::delay(1000);
+    canLimit = true;
+
 
     //back out
     moveToPoint(35, -40, -2.979, true);
@@ -108,20 +108,23 @@ void skills()
     //get ball
     moveToPoint(-7.12, 16.5, -0.304, true, 50);
     //go to front of tower
-    moveToPoint(-28.5, 47, -2.308, true, 60);
+    moveToPoint(-27.5, 44, -2.308, true, 60);
     //score MIDDLE
-    moveToPoint(-36.75, 44, -2.25, false, 70, 3000);
+    moveToPoint(-35.75, 41, -2.25, false, 70, 3000);
     canLimit = false;
-    pros::delay(1000);
+    pros::delay(800);
     canLimit = true;
     
-    moveToPoint(-27.97, 48.75, -2.308, true, 80);
-
+    moveToPoint(-29.97, 48.75, -2.308, true, 60);
+    //get rid of blue
+    canLimit = false;
+    pros::delay(800);
+    canLimit = true;
     //get next ball
-    moveToPoint(-51, 71, -0.89, false, 50, 4000);
+    moveToPoint(-58, 69, -0.97, false, 50, 4000);
     //go to text tower CORNER
     
-    moveToPoint(-71, 86, -1.47, false, 80, 4000);
+    moveToPoint(-83, 78, -1.47, false, 60, 4000);
     canLimit = false;
     pros::delay(1250);
     //back out
@@ -129,30 +132,31 @@ void skills()
     pros::delay(1000);
     canLimit = true;
     //go towards next ball
-    moveToPoint(-47, 90, -0.7, false, 70, 4000);
+    moveToPoint(-61, 84, -0.7, false, 60, 3000);
     //get next ball
-    moveToPoint(-55, 100, -0.7, false, 80, 4000);
-
-    moveToPoint(-22, 112, -0.7, true, 80, 3000);
+    moveToPoint(-67, 94, -0.7, false, 60, 3000);
+    //go towards middle tower
+    moveToPoint(-36, 108, -0.7, true, 60, 3000);
     //go towards next tower. MIDDLE
-    moveToPoint(-22.5, 115.75, -0.65, false, 80, 3000);
+    moveToPoint(-39, 113.75, -0.65, false, 60, 3000);
     canLimit = false;;
-    pros::delay(1200);
+    pros::delay(800);
     canLimit = true;
     //backout
-    moveToPoint(-22, 112, -0.65, true, 80, 3000);
+    moveToPoint(-22, 112, -0.65, true, 60, 3000);
 
     
     //right towards ball
-    moveToPoint(9, 132, -0.60, false, 80, 3000);
+    moveToPoint(-18, 141, -0.60, false, 60, 3000);
     //get ball
-    moveToPoint(0, 137, -0.60, false, 80, 3000);
+    moveToPoint(-23, 145, -0.60, false, 60, 3000);
     //get near tower
-    moveToPoint(26.17, 140.28, 0.181, false, 80);
-    moveToPoint(25.17, 146, 0.15, false, 70);
+    moveToPoint(-5, 157.28, 0.181, false, 60, 3000);
+    moveToPoint(-6, 160, 0.18, false, 60, 3000);
     canLimit = false;
     pros::delay(1200);
-    moveToPoint(5.17, 138.28, 0.181, false, 80);
+    //go towards mid
+    moveToPoint(12, 650, -2.25, false, 60, 4000);
 
 
 
@@ -176,13 +180,13 @@ void right()
     canLimit = true;
     setLoaders(loaderSetting::Forward);
     moveToPoint(0, 6, 0, true);
-    moveToPoint(15.5, 30, 1.542, true, 100);
-    moveToPoint(32, 35.5, 1.5, false, 70);
+    moveToPoint(15.5, 30, 1.6, true, 90);
+    moveToPoint(31, 34, 1.6, false, 70, 2500);
      waitUntilPressCount(1, false, 0);
      setLoaders(loaderSetting::Disabled);
      canLimit = false;
-    pros::delay(2000);
-    moveToPoint(17.5, 36.42, 1.542, true, 110);
+    pros::delay(300);
+    moveToPoint(17.5, 36.42, 1.542, true, 100, 3000);
 }
 //actually running the auton
 void runAuton()
@@ -190,9 +194,9 @@ void runAuton()
     canLimit = true;
     runningAuton = true;
     init();
-    moveToPoint(0.0, 8.0, 0.0, false);
-    //skills();
-
-
+    //moveToPoint(0.0, 8.0, 0.0, false);
+    skills();
+    //left();
+   // left();
     runningAuton = false;
 }
