@@ -13,7 +13,7 @@ bool redPassed = false;
 bool bluePassed = false;
 //tuning variables
 //215 for driving
-static int32_t delayEject = 150;
+static int32_t delayEject = 250;
 static int32_t mainSpeed = 127;
 
 static int32_t minVelocity = 450;

@@ -112,7 +112,7 @@ void skills()
     //score MIDDLE
     moveToPoint(-35.75, 41, -2.25, false, 70, 3000);
     canLimit = false;
-    pros::delay(800);
+    pros::delay(600);
     canLimit = true;
     
     moveToPoint(-29.97, 48.75, -2.308, true, 60);
@@ -123,12 +123,14 @@ void skills()
     //get next ball
     moveToPoint(-58, 69, -0.97, false, 50, 4000);
     //go to text tower CORNER
-    
-    moveToPoint(-83, 78, -1.47, false, 60, 4000);
+    setLoaders(loaderSetting::Backward);
+    moveToPoint(-80, 77, -1.47, false, 60, 3000);
     canLimit = false;
-    pros::delay(1250);
+    pros::delay(600);
     //back out
     moveToPoint(-67.29, 78.19, -1.466, true, 90);
+    setLoaders(loaderSetting::Forward);
+
     pros::delay(1000);
     canLimit = true;
     //go towards next ball
@@ -137,27 +139,46 @@ void skills()
     moveToPoint(-67, 94, -0.7, false, 60, 3000);
     //go towards middle tower
     moveToPoint(-36, 108, -0.7, true, 60, 3000);
+    setLoaders(loaderSetting::Backward);
     //go towards next tower. MIDDLE
     moveToPoint(-39, 113.75, -0.65, false, 60, 3000);
+    
+
     canLimit = false;;
     pros::delay(800);
     canLimit = true;
     //backout
     moveToPoint(-22, 112, -0.65, true, 60, 3000);
-
+    setLoaders(loaderSetting::Forward);
     
     //right towards ball
     moveToPoint(-18, 141, -0.60, false, 60, 3000);
     //get ball
-    moveToPoint(-23, 145, -0.60, false, 60, 3000);
+    moveToPoint(-21, 144, -0.60, false, 60, 3000);
+    //backout
+     moveToPoint(-18, 138, -0.60, false, 60, 3000);
     //get near tower
-    moveToPoint(-5, 157.28, 0.181, false, 60, 3000);
-    moveToPoint(-6, 160, 0.18, false, 60, 3000);
+    moveToPoint(-7, 157.28, 0.181, false, 60, 3000);
+    moveToPoint(-8, 160, 0.18, false, 60, 3000);
     canLimit = false;
     pros::delay(1200);
     //go towards mid
-    moveToPoint(12, 650, -2.25, false, 60, 4000);
+    canLimit = true;
+    //get towards ball
+    moveToPoint(-14, 106, -2.4, false, 60);
+    //get ball
+    moveToPoint(-20, 100, -2.4, false, 60);
+    pros::delay(1000);
+    setLoaders(loaderSetting::Backward);
+    //get inside middle
+    moveToPoint(-11, 92, 2.35, false, 60, 4000);
+    moveToPoint(-11, 92, 2.35, false, 60, 4000);
 
+    
+    canLimit = false;
+
+
+    pros::delay(10000);
 
 
 }
@@ -167,26 +188,34 @@ void left()
     setLoaders(loaderSetting::Forward);
     moveToPoint(0, 6, 0, true);
 
-    moveToPoint(-15, 33, -0.745, true, 110);
-    moveToPoint(-33, 36, -1.57, false, 90);
+    moveToPoint(-15, 33, -0.745, true, 110, 3000);
+    moveToPoint(-33, 36, -1.57, false, 90, 3000);
 
-    waitUntilPressCount(1, false, 0);
-    pros::delay(250);
-
+    waitUntilPressCount(2, false, 0);
+    pros::delay(700);
+    setLoaders(loaderSetting::Backward);
     moveToPoint(-25, 30, -1.57, false, 100);
+
+    //after backout
+    setLoaders(loaderSetting::Disabled);
+    moveToPoint(26.5, 35, 0.9, false, 70);
+    moveToPoint(31, 29, 1.3, false, 40, 3000);
+    moveToPoint(28, 29, 1.3, false, 40, 3000);
+
 }
 void right()
 {
     canLimit = true;
     setLoaders(loaderSetting::Forward);
     moveToPoint(0, 6, 0, true);
-    moveToPoint(15.5, 30, 1.6, true, 90);
-    moveToPoint(31, 34, 1.6, false, 70, 2500);
-     waitUntilPressCount(1, false, 0);
-     setLoaders(loaderSetting::Disabled);
+    moveToPoint(15.5, 30, 1.54, true, 90);
+    moveToPoint(31, 34, 1.54, false, 70, 2500);
+     waitUntilPressCount(2, false, 0);
      canLimit = false;
-    pros::delay(300);
-    moveToPoint(17.5, 36.42, 1.542, true, 100, 3000);
+    pros::delay(600);
+        setLoaders(loaderSetting::Backward);
+
+    moveToPoint(18, 37, 1.542, true, 100, 3000);
 }
 //actually running the auton
 void runAuton()
@@ -195,8 +224,8 @@ void runAuton()
     runningAuton = true;
     init();
     //moveToPoint(0.0, 8.0, 0.0, false);
-    skills();
-    //left();
-   // left();
+    //homeRow();
+    //skills();
+    left();
     runningAuton = false;
 }
